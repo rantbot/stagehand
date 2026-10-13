@@ -1,0 +1,3 @@
+/* themes/classic.css, the default Stagehand look: dark, warm and quiet.
+   stagehand.css already sets it, so this file only loads the fonts. */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Inter:wght@400..600&display=swap');

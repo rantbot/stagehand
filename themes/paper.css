@@ -1,0 +1,49 @@
+/* themes/paper.css, a Stagehand theme. Link it after stagehand.css. */
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=Inter:wght@400..600&display=swap');
+
+/*
+ * Paper: a light, editorial look for retros, case studies and research
+ * readouts. Everything below is ordinary CSS on top of stagehand.css.
+ * Change the variables to make it yours.
+ */
+:root {
+  --sh-bg: #F3EEE4;
+  --sh-ink: #E4DCCD;
+  --sh-text: #1C1A16;
+  --sh-soft: #3D3A33;
+  --sh-muted: #7A7366;
+  --sh-accent: #B3402A;
+  --sh-accent-strong: #B3402A;
+  --sh-line: rgba(28, 26, 22, 0.16);
+  --sh-display: 'Newsreader', Georgia, serif;
+  --sh-ui: Inter, 'Helvetica Neue', Arial, sans-serif;
+  --sh-gate: #F3EEE4;
+  --sh-glow: rgba(179, 64, 42, 0.05);
+  --sh-frame: rgba(28, 26, 22, 0.2);
+  --sh-fill: rgba(255, 255, 255, 0.5);
+  --sh-dim: rgba(243, 238, 228, 0.6);
+  --sh-head-case: none;
+  --sh-head-track: 0em;
+  --sh-head-weight: 400;
+  --sh-title-weight: 300;
+  --sh-lede-style: italic;
+  color-scheme: light;
+}
+
+/* A hairline under the running head, like a printed page. */
+.deck > section::after { content: ""; position: absolute; left: 128px; right: 128px; top: 104px; border-top: 1px solid var(--sh-line); }
+.deck > section.bare::after, .deck > section.divider::after { display: none; }
+.deck .big-num { font-weight: 300; }
+.deck h1 { font-size: 132px; letter-spacing: -0.01em; }
+.deck h2 { font-size: 92px; letter-spacing: -0.01em; }
+.deck h2 em { color: var(--sh-accent); }
+.stat b { font-weight: 300; font-size: 168px; color: var(--sh-text); }
+.stat b small { font-size: 0.4em; color: var(--sh-muted); margin-left: 8px; }
+.stat p { border-top: 1px solid var(--sh-line); padding-top: 18px; }
+.card h3 { font-style: italic; }
+.card .eyebrow { margin-bottom: 8px; }
+
+/* A pull quote with a hanging mark. */
+.quote { font-size: 76px !important; line-height: 1.18 !important; color: var(--sh-text) !important; font-weight: 300; max-width: 1450px; text-indent: -0.42em; }
+.quote::before { content: "\201C"; color: var(--sh-accent); }
+.quote::after { content: "\201D"; color: var(--sh-accent); }

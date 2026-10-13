@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your talk</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Inter:wght@400..600&display=swap">
+<link rel="stylesheet" href="stagehand.css">
+</head>
+<body>
+
+<!-- data-length is the talk's length in minutes, for the timer in your window. -->
+<div class="deck" data-title="Your talk" data-length="5">
+
+  <!-- The opening card. Delete it to start straight on the first slide. -->
+  <header class="title-card">
+    <p class="eyebrow">Where · When</p>
+    <h1>Your talk</h1>
+    <hr class="rule">
+    <p class="sub">One line on what it is about</p>
+    <p class="credit">Your name</p>
+    <aside>Notes for yourself while the title is up.</aside>
+  </header>
+
+  <section>
+    <p class="eyebrow">Part one</p>
+    <h2>A heading</h2>
+    <p class="narrow">A sentence or two. Keep the words on the slide short and say the rest.</p>
+    <aside>What you say on this slide.</aside>
+  </section>
+
+  <section>
+    <div class="photo right"><img src="sample.svg" alt="Describe the photo"></div>
+    <div class="over-photo" style="display:flex;flex-direction:column;gap:28px">
+      <h2>A photo slide</h2>
+      <div class="rows">
+        <span>Label</span><span>Value</span>
+        <span>Label</span><span>Value</span>
+      </div>
+    </div>
+    <aside>What you say about the photo.</aside>
+  </section>
+
+  <section>
+    <h2>Three points</h2>
+    <ol class="points narrow">
+      <li class="reveal"><p>The first point.</p></li>
+      <li class="reveal"><p>The second point.</p></li>
+      <li class="reveal"><p>The third point.</p></li>
+    </ol>
+    <aside>An introduction. (click) The first point. (click) The second. (click) And the third.</aside>
+  </section>
+
+  <section class="centered">
+    <h1>The end</h1>
+    <aside>Thank you.</aside>
+  </section>
+
+</div>
+
+<script type="module" src="stagehand.js"></script>
+</body>
+</html>

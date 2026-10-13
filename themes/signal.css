@@ -1,0 +1,51 @@
+/* themes/signal.css, a Stagehand theme. Link it after stagehand.css. */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400..700&family=Inter:wght@400..600&display=swap');
+
+/*
+ * Signal: a bold, bright look for updates, pitches and kickoffs.
+ * Big type, one loud color, and section slides that flood the screen.
+ */
+:root {
+  --sh-bg: #111116;
+  --sh-ink: #08080B;
+  --sh-text: #FFFFFF;
+  --sh-soft: #C8C9D4;
+  --sh-muted: #8B8CA1;
+  --sh-accent: #FF5A36;
+  --sh-accent-strong: #FF5A36;
+  --sh-line: rgba(255, 255, 255, 0.14);
+  --sh-display: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  --sh-ui: 'Space Grotesk', Inter, 'Helvetica Neue', Arial, sans-serif;
+  --sh-gate: #111116;
+  --sh-glow: rgba(255, 90, 54, 0.22);
+  --sh-frame: rgba(255, 255, 255, 0.14);
+  --sh-fill: rgba(255, 255, 255, 0.04);
+  --sh-dim: rgba(17, 17, 22, 0.65);
+  --sh-head-case: none;
+  --sh-head-track: -0.03em;
+  --sh-head-weight: 700;
+  --sh-title-weight: 700;
+  --sh-lede-style: normal;
+}
+
+/* A section slide in the loud color. Put class="loud" on any section. Markdown section slides get it too. */
+.deck > section.loud, .deck > section.divider {
+  --sh-bg: #FF5A36; --sh-text: #111116; --sh-soft: #2B0D06; --sh-muted: #5C1D0F;
+  --sh-accent: #111116; --sh-accent-strong: #111116; --sh-line: rgba(17, 17, 22, 0.25);
+}
+.deck h1 { font-size: 180px; line-height: 0.95; letter-spacing: -0.04em; }
+.deck h2 { font-size: 104px; line-height: 1; }
+.deck h3 { font-weight: 600; letter-spacing: -0.01em; }
+.eyebrow { letter-spacing: 0.2em; font-weight: 600; }
+.deck .big-num { font-size: 300px; font-weight: 700; line-height: 0.8; letter-spacing: -0.06em; color: var(--sh-text); }
+.stat b { font-family: var(--sh-display); font-weight: 700; font-size: 168px; letter-spacing: -0.05em; }
+.card { border-radius: 20px; border-width: 2px; }
+.card .eyebrow { font-size: 18px !important; }
+.points li::before { font-weight: 700; font-size: 26px; padding-top: 8px; }
+
+/* A simple bar chart, drawn with plain boxes. */
+.chart { position: absolute; left: 1000px; top: 300px; width: 760px; height: 520px; display: flex; align-items: flex-end; gap: 40px; border-bottom: 2px solid var(--sh-line); }
+.chart .bar { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 14px; }
+.chart .bar i { width: 100%; background: #3A3B4A; border-radius: 12px 12px 0 0; }
+.chart .bar.hot i { background: var(--sh-accent); }
+.chart .bar span { font-family: var(--sh-ui); font-size: 20px; letter-spacing: 0.12em; color: var(--sh-muted); position: absolute; bottom: -44px; }

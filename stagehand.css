@@ -1,0 +1,282 @@
+/*
+ * stagehand.css
+ *
+ * Contents
+ *   1. Theme        the colors and type, change these to restyle a deck
+ *   2. Stage        one 1920 by 1080 canvas, scaled to fit any window
+ *   3. Slide kit    a few layouts and pieces worth reusing
+ *   4. Motion       crossfades, slow drift on photos, text that rises in
+ *   5. Title card   the opening card on solid black
+ *   6. Presenter    the private window with your script and controls
+ *
+ * Slides are laid out on a fixed 1920 by 1080 canvas, so a size in pixels
+ * here always means the same thing on a laptop and on a projector.
+ */
+
+/* 1. Theme ---------------------------------------------------------------- */
+:root {
+  --sh-bg: #0D0C0A;           /* slide background */
+  --sh-ink: #090908;          /* around the slide */
+  --sh-text: #EDE6D8;
+  --sh-soft: #D9D1C1;         /* body copy */
+  --sh-muted: #A89F8F;        /* labels and captions */
+  --sh-accent: #C9A15A;
+  --sh-accent-strong: #E2B866;
+  --sh-line: rgba(237, 230, 216, 0.18);
+  --sh-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --sh-ui: Inter, 'Helvetica Neue', Arial, sans-serif;
+  --sh-gate: #050504;         /* behind the title card */
+  --sh-glow: rgba(201, 161, 90, 0.10);  /* the soft light on the title card */
+  --sh-frame: #3A352D;        /* card borders */
+  --sh-fill: rgba(0, 0, 0, 0.25);       /* inside cards */
+  --sh-dim: rgba(0, 0, 0, 0.28);        /* the shade around a ring */
+  --sh-head-case: uppercase;  /* none for sentence case headings */
+  --sh-head-track: 0.08em;    /* heading letter spacing */
+  --sh-head-weight: 400;
+  --sh-title-weight: 300;     /* the big title on the title card */
+  --sh-lede-style: italic;    /* .lede and the title card's subtitle */
+  color-scheme: dark;
+
+  /* Your private window keeps one look whatever the deck's theme. */
+  --pv-text: #EDE6D8;
+  --pv-soft: #D9D1C1;
+  --pv-muted: #A89F8F;
+  --pv-accent: #C9A15A;
+  --pv-accent-strong: #E2B866;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--sh-ink); color: var(--sh-text); font-family: var(--sh-ui); overflow: hidden; -webkit-font-smoothing: antialiased; }
+[hidden] { display: none !important; }
+
+/* 2. Stage ---------------------------------------------------------------- */
+.sh-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--sh-ink); }
+.sh-viewport.hide-cursor { cursor: none; }
+.sh-stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; background: var(--sh-bg); overflow: hidden; }
+.deck > section {
+  position: absolute; inset: 0; width: 1920px; height: 1080px; padding: 128px; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: center; gap: 28px;
+  font-family: var(--sh-display); color: var(--sh-text); background: var(--sh-bg);
+  opacity: 0; visibility: hidden;
+}
+:where(.deck > section > *) { position: relative; }
+.deck aside, .deck .title-card { display: none; }
+.deck p, .deck h1, .deck h2, .deck h3, .deck ul, .deck ol { margin: 0; }
+.deck h1 { font-size: 112px; font-weight: var(--sh-head-weight); line-height: 1.05; letter-spacing: calc(var(--sh-head-track) * 0.75); text-transform: var(--sh-head-case); text-wrap: balance; }
+.deck h2 { font-size: 72px; font-weight: var(--sh-head-weight); line-height: 1.1; letter-spacing: var(--sh-head-track); text-transform: var(--sh-head-case); text-wrap: balance; }
+.deck h3 { font-size: 44px; font-weight: 400; line-height: 1.2; }
+.deck p, .deck li { font-size: 34px; line-height: 1.4; color: var(--sh-soft); }
+.deck em { color: var(--sh-accent); }
+.deck img, .deck video { display: block; max-width: none; }
+.deck code { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 0.82em; color: var(--sh-accent-strong); }
+
+/* 3. Slide kit ------------------------------------------------------------ */
+.eyebrow { font-family: var(--sh-ui) !important; font-size: 22px !important; letter-spacing: 0.32em; text-transform: uppercase; color: var(--sh-accent) !important; }
+.caption { font-family: var(--sh-ui) !important; font-size: 20px !important; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sh-muted) !important; }
+.lede { font-size: 48px !important; font-style: var(--sh-lede-style); line-height: 1.25 !important; color: var(--sh-text) !important; max-width: 1300px; }
+.rule { width: 96px; height: 0; border: 0; border-top: 2px solid var(--sh-accent); margin: 0; }
+.centered { align-items: center; text-align: center; }
+.narrow { max-width: 1100px; }
+
+/* A photo filling the slide. Add .shade for a dark wash so text reads over it. */
+.photo { position: absolute !important; inset: 0; overflow: hidden; }
+.photo img, .photo video { width: 100%; height: 100%; object-fit: cover; }
+.photo.right { left: 820px; }
+.photo.right::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, var(--sh-bg) 0%, transparent 45%); }
+.photo.shade::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, color-mix(in srgb, var(--sh-bg) 92%, transparent) 0%, color-mix(in srgb, var(--sh-bg) 60%, transparent) 55%, color-mix(in srgb, var(--sh-bg) 15%, transparent) 100%); }
+.over-photo { max-width: 860px; }
+
+/* Labels and values that always line up, whatever the label length. */
+.rows { display: grid; grid-template-columns: 300px 1fr; gap: 18px 32px; align-items: baseline; }
+.rows > :nth-child(odd) { font-family: var(--sh-ui); font-size: 22px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sh-muted); }
+.rows > :nth-child(even) { font-size: 34px; color: var(--sh-text); }
+
+/* Side by side columns or cards. */
+.columns { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 56px; }
+.card { border: 1px solid var(--sh-frame); background: var(--sh-fill); padding: 40px; display: flex; flex-direction: column; gap: 14px; }
+
+/* A big number with a caption under it. */
+.stat { display: flex; flex-direction: column; gap: 12px; }
+.stat b { font-family: var(--sh-display); font-weight: 300; font-size: 200px; line-height: 0.9; color: var(--sh-accent-strong); }
+
+/* A numbered list of short points. */
+.points { list-style: none; padding: 0; display: grid; gap: 30px; counter-reset: pt; }
+.points li { display: grid; grid-template-columns: 64px 1fr; gap: 20px; counter-increment: pt; }
+.points li::before { content: counter(pt, decimal-leading-zero); font-family: var(--sh-ui); font-size: 22px; letter-spacing: 0.12em; color: var(--sh-accent); padding-top: 12px; }
+
+/* A plain list with a short accent dash instead of numbers. */
+.points.dots li::before { content: ""; width: 28px; height: 0; border-top: 2px solid var(--sh-accent); padding: 0; margin-top: 26px; }
+.points.dots li { grid-template-columns: 44px 1fr; }
+
+/* A pull quote with hanging marks, and the line that credits it. */
+.quote { font-size: 72px !important; line-height: 1.2 !important; color: var(--sh-text) !important; max-width: 1450px; text-indent: -0.42em; text-wrap: balance; }
+.quote::before { content: "\201C"; color: var(--sh-accent); }
+.quote::after { content: "\201D"; color: var(--sh-accent); }
+
+/* A very large number, for section openers. */
+.deck .big-num { font-family: var(--sh-display); font-size: 260px; font-weight: var(--sh-head-weight); line-height: 0.8; letter-spacing: -0.04em; color: var(--sh-accent); }
+
+/* Code on a slide. */
+.deck .code { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 26px; line-height: 1.55; color: var(--sh-text); background: var(--sh-fill); border: 1px solid var(--sh-frame); padding: 36px 44px; white-space: pre; overflow: hidden; max-width: 1664px; }
+
+/* A simple table. */
+.table { border-collapse: collapse; font-size: 30px; max-width: 1664px; }
+.table th { font-family: var(--sh-ui); font-size: 20px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sh-muted); text-align: left; padding: 0 48px 16px 0; border-bottom: 1px solid var(--sh-line); }
+.table td { color: var(--sh-soft); padding: 18px 48px 18px 0; border-bottom: 1px solid var(--sh-line); }
+
+/* A section opener. Themes can restyle it, Signal floods it with color. */
+.deck > section.divider h1 { font-size: 150px; }
+
+/* Pieces the Markdown converter uses. */
+.stack { display: flex; flex-direction: column; gap: 28px; }
+.deck .figure { max-width: 100%; max-height: 640px; object-fit: contain; align-self: flex-start; }
+.stat.big b { font-size: 280px; }
+.statement p { font-size: 64px !important; line-height: 1.2; color: var(--sh-text); max-width: 1500px; text-wrap: balance; }
+.columns.stats { margin-top: 24px; }
+.columns.cards { margin-top: 20px; align-items: stretch; }
+.card ol.points, .card .rows { gap: 12px; }
+.deck .code + *, .deck .table + * { margin-top: 8px; }
+.deck a { color: inherit; text-decoration-color: var(--sh-accent); text-underline-offset: 0.18em; }
+/* Slides with more words than fit get smaller type, set for you. */
+.dense { gap: 22px; }
+.dense p, .dense li, .dense .rows > :nth-child(even) { font-size: 28px; }
+.dense h2 { font-size: 60px; }
+.dense .code { font-size: 21px; padding: 28px 36px; }
+.denser p, .denser li, .denser .rows > :nth-child(even), .denser .table { font-size: 24px; }
+.denser h2 { font-size: 52px; }
+.denser .code { font-size: 18px; }
+
+/* A ring that circles part of a slide. Pair it with .reveal.only so it moves as you click. */
+.ring { position: absolute !important; border: 3px solid var(--sh-accent-strong); border-radius: 50%; pointer-events: none; box-shadow: 0 0 0 4000px var(--sh-dim); }
+
+/* Reveals: hidden until you click. .only shows during its own click and hides again after. */
+.reveal { opacity: 0; transition: opacity 0.6s ease; }
+.reveal.on { opacity: 1; }
+.reveal.only.past { opacity: 0; }
+
+/* The slide number in the corner, written for you. */
+.sh-num { position: absolute !important; left: 128px; top: 64px; font-family: var(--sh-ui); font-size: 22px; letter-spacing: 0.2em; color: var(--sh-muted); text-shadow: 0 1px 8px var(--sh-dim); }
+
+/* 4. Motion --------------------------------------------------------------- */
+/* The new slide fades in on top while the old one holds still, so nothing dips to black. */
+.deck > section { transform: scale(1.006); transition: opacity 0.9s cubic-bezier(.4,0,.2,1), transform 1.6s cubic-bezier(.2,.7,.2,1), visibility 0s linear 0.9s; }
+.deck > section.active { z-index: 2; opacity: 1; visibility: visible; transform: none; transition: opacity 0.9s cubic-bezier(.4,0,.2,1), transform 1.6s cubic-bezier(.2,.7,.2,1); }
+.deck > section.leaving { z-index: 1; opacity: 1; visibility: visible; transform: none; transition: none; }
+.photo > img, .photo > video { will-change: transform; }
+.active .photo:not(.still) > img, .leaving .photo:not(.still) > img { animation: sh-drift 26s cubic-bezier(.25,.6,.3,1) both; }
+.alt.active .photo:not(.still) > img, .alt.leaving .photo:not(.still) > img { animation-name: sh-drift-b; }
+@keyframes sh-drift { from { transform: scale(1.03) translate(0.6%, 0.4%); } to { transform: scale(1.09) translate(-1.1%, -0.7%); } }
+@keyframes sh-drift-b { from { transform: scale(1.09) translate(-0.8%, 0.5%); } to { transform: scale(1.03) translate(0.5%, -0.3%); } }
+.active .rise, .leaving .rise { animation: sh-rise 1.15s cubic-bezier(.2,.7,.2,1) both; animation-delay: var(--d, 0ms); }
+@keyframes sh-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.sh-grain { position: absolute; inset: -60px; pointer-events: none; opacity: 0.06; mix-blend-mode: overlay; z-index: 3;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation: sh-grain 0.9s steps(6) infinite; }
+@keyframes sh-grain { 0% { transform: translate(0, 0); } 25% { transform: translate(-22px, 14px); } 50% { transform: translate(18px, -26px); } 75% { transform: translate(-12px, 30px); } 100% { transform: translate(0, 0); } }
+@media (prefers-reduced-motion: reduce) {
+  .deck > section, .deck > section.active { transform: none; }
+  .photo > img, .rise, .sh-grain, .sh-gate * { animation: none !important; }
+}
+
+/* 5. Title card ----------------------------------------------------------- */
+.sh-gate { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; padding: 24px 16px; background: var(--sh-gate); transition: opacity 1.8s ease; cursor: pointer; }
+.sh-gate.gone { opacity: 0; pointer-events: none; }
+.sh-gate::before { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 55% 38% at 50% 50%, var(--sh-glow), transparent 70%), radial-gradient(ellipse at 50% 50%, transparent 40%, color-mix(in srgb, var(--sh-gate) 75%, transparent) 100%); }
+.sh-card { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; width: min(1200px, 100%); }
+.sh-card .eyebrow { font-size: clamp(10px, 1vw, 13px) !important; letter-spacing: 0.5em; color: var(--sh-muted) !important; margin: 0 0 clamp(22px, 3.5vh, 40px); animation: sh-in 2.4s ease 0.5s both; }
+.sh-card h1 { margin: 0; font-family: var(--sh-display); font-weight: var(--sh-title-weight); text-transform: var(--sh-head-case); line-height: 1.02; font-size: clamp(30px, 8vw, 128px); letter-spacing: calc(var(--sh-head-track) * 1.75); padding-left: calc(var(--sh-head-track) * 1.75); text-wrap: balance; animation: sh-title 7s cubic-bezier(.16,.7,.2,1) 1.2s both; }
+.sh-card .rule { width: 160px; margin: clamp(26px, 4vh, 44px) 0 clamp(18px, 2.6vh, 28px); animation: sh-rule 2.2s cubic-bezier(.2,.7,.2,1) 3.6s both; }
+.sh-card .sub { margin: 0; font-family: var(--sh-display); font-style: var(--sh-lede-style); font-size: clamp(18px, 2.3vw, 34px); color: var(--sh-soft); animation: sh-in 2.6s ease 4.2s both; }
+.sh-card .credit { margin: clamp(30px, 6vh, 64px) 0 0; font-size: clamp(10px, 0.95vw, 12px); letter-spacing: 0.42em; text-transform: uppercase; color: var(--sh-muted); animation: sh-in 2.4s ease 5.4s both; }
+@keyframes sh-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sh-title { from { opacity: 0; transform: scale(1.07); filter: blur(6px); } 35% { opacity: 1; filter: blur(0); } to { opacity: 1; transform: scale(1); filter: blur(0); } }
+@keyframes sh-rule { from { transform: scaleX(0); opacity: 0; } to { transform: scaleX(1); opacity: 1; } }
+.sh-pill { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 12; font-family: var(--sh-ui); font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--pv-text);
+  background: rgba(9,9,8,0.85); border: 1px solid rgba(201,161,90,0.6); padding: 11px 18px; pointer-events: none; }
+.sh-toast { position: fixed; left: 50%; top: 24px; transform: translateX(-50%); z-index: 12; max-width: min(620px, calc(100% - 32px)); font-size: 14px; line-height: 1.5; color: var(--pv-text); background: rgba(13,12,10,0.95); border: 1px solid rgba(201,161,90,0.7); padding: 12px 18px; text-align: center; }
+
+/* 6. Presenter ------------------------------------------------------------ */
+.sh-pv { display: none; }
+body.presenter .sh-viewport, body.presenter .sh-gate { display: none !important; }
+body.presenter { overflow: auto; }
+body.presenter .sh-pv { display: grid; position: fixed; inset: 0; grid-template-columns: minmax(300px, 0.8fr) minmax(0, 1.5fr); grid-template-rows: auto auto minmax(0, 1fr) auto; gap: 0 32px; padding: 0 32px; background: #0B0A09; color: var(--pv-text); font-family: var(--sh-ui); }
+.pv-top { grid-column: 1 / -1; display: flex; align-items: center; gap: 24px; padding: 18px 0 16px; border-bottom: 1px solid #221F1A; }
+.pv-id { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
+.pv-mark { font-family: var(--sh-display); font-size: 17px; letter-spacing: 0.16em; text-transform: uppercase; color: #CFC6B4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pv-link { font-size: 12px; color: #7D7466; }
+.pv-link.on { color: #9DB38A; }
+.pv-link.on::before { content: "● "; }
+.pv-clock { display: flex; flex-direction: column; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
+.pv-time { display: flex; align-items: baseline; gap: 8px; }
+.pv-el { font-size: 34px; font-weight: 500; line-height: 1; }
+.pv-el.over { color: #E0775A; }
+.pv-of { font-size: 14px; color: #7D7466; }
+.pv-prog { width: 180px; height: 3px; background: #24211C; border-radius: 2px; overflow: hidden; }
+.pv-prog i { display: block; height: 100%; width: 0; background: var(--pv-accent); transition: width .5s linear; }
+.pv-prog i.over { background: #E0775A; }
+.pv-util { flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+.pv-util button { font: inherit; font-size: 13px; color: #B9B09F; background: transparent; border: 1px solid transparent; border-radius: 8px; padding: 8px 12px; cursor: pointer; }
+.pv-util button:hover { background: #1A1815; color: var(--pv-text); }
+.pv-util button[aria-pressed="false"] { color: #E0775A; }
+.pv-util input[type=range] { width: 84px; accent-color: var(--pv-accent); margin-right: 8px; }
+.pv-arm { grid-column: 1 / -1; grid-row: 2; margin-top: 14px; border-radius: 8px; font-size: 15px; color: #1a1408; background: var(--pv-accent-strong); padding: 12px 18px; }
+.pv-left { grid-row: 3; display: flex; flex-direction: column; gap: 8px; min-width: 0; min-height: 0; padding-top: 22px; overflow: hidden; }
+.pv-label { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #7D7466; display: flex; justify-content: space-between; gap: 12px; }
+.pv-label .bed { letter-spacing: 0.06em; text-transform: none; color: #6B6457; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pv-box { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: var(--sh-bg); border-radius: 8px; box-shadow: 0 0 0 1px #2A2620; flex-shrink: 0; margin-bottom: 14px; }
+.pv-box.next { opacity: 0.72; }
+.pv-box > .sh-stage { position: absolute; left: 50%; top: 50%; }
+.pv-right { grid-row: 3; display: flex; flex-direction: column; min-width: 0; min-height: 0; padding-top: 22px; }
+.pv-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 14px; }
+.pv-where { display: flex; align-items: baseline; gap: 14px; min-width: 0; }
+.pv-where .n { font-size: 13px; color: var(--pv-accent); font-variant-numeric: tabular-nums; letter-spacing: 0.08em; }
+.pv-where .t { font-family: var(--sh-display); font-size: 26px; color: #E6DECF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pv-edit { display: flex; gap: 6px; align-items: center; }
+.pv-edit button { font: inherit; font-size: 12px; color: #9C9384; background: transparent; border: 1px solid #2E2A24; border-radius: 999px; padding: 5px 12px; cursor: pointer; }
+.pv-edit button:hover { color: var(--pv-text); border-color: var(--pv-accent); }
+.pv-edit .on { color: #1a1408 !important; background: var(--pv-accent); border-color: var(--pv-accent); }
+.pv-edit span { font-size: 12px; color: #6B6457; margin-right: 6px; }
+body.on-title .pv-edit { visibility: hidden; }
+.pv-notes { position: relative; min-width: 0; min-height: 0; flex: 1; overflow: auto; padding-right: 4px; scroll-behavior: smooth; }
+.pv-say { font-size: clamp(20px, 1.75vw, 30px); line-height: 1.55; white-space: pre-line; max-width: 34em; color: #F1EADD; }
+.pv-say.editing { outline: 1px dashed rgba(201,161,90,0.6); outline-offset: 8px; white-space: pre-wrap; caret-color: var(--pv-accent); }
+.pv-say .gap { display: block; height: 0.7em; }
+.pv-say .cue { display: inline-block; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--pv-accent); border: 1px solid rgba(201,161,90,0.45); border-radius: 999px; padding: 3px 10px; margin: 0 6px 0 0; vertical-align: 0.3em; }
+.pv-say .cue.reveal-btn { font-family: var(--sh-ui); min-width: 30px; text-align: center; cursor: pointer; background: rgba(201,161,90,0.14); color: #F1EADD; border-color: var(--pv-accent); padding: 5px 12px; }
+.pv-say .cue.reveal-btn:hover { background: rgba(201,161,90,0.28); }
+.pv-say .cue.reveal-btn:disabled { cursor: default; background: transparent; color: #6B6457; border-color: #2E2A24; }
+.pv-more { position: sticky; bottom: 0; height: 90px; margin-top: -40px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 12px; pointer-events: none; background: linear-gradient(180deg, rgba(11,10,9,0) 0%, rgba(11,10,9,0.94) 60%, #0B0A09 100%); transition: opacity .25s; }
+.pv-more button { pointer-events: auto; font: inherit; font-size: 12px; color: #E6DECF; background: #1A1815; border: 1px solid #3A352D; border-radius: 999px; padding: 7px 16px; cursor: pointer; }
+.pv-more.done { opacity: 0; }
+.pv-more.done button { pointer-events: none; }
+.pv-nav { grid-column: 1 / -1; grid-row: 4; display: flex; align-items: center; gap: 20px; padding: 16px 0 18px; border-top: 1px solid #221F1A; }
+.pv-nav button { font: inherit; cursor: pointer; border-radius: 12px; }
+.pv-back { width: 72px; height: 64px; font-size: 22px; color: #CFC6B4; background: #151311; border: 1px solid #2A2620; }
+.pv-back:hover { background: #1C1A16; }
+.pv-go { min-width: 300px; height: 64px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px; padding: 0 24px; text-align: left; color: #1A1408; background: var(--pv-accent); border: 0; }
+.pv-go:hover { filter: brightness(1.08); }
+.pv-go .m { font-size: 19px; font-weight: 600; }
+.pv-go .s { font-size: 12px; color: rgba(26,20,8,0.7); max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pv-go .s:empty { display: none; }
+.pv-dots { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; }
+.pv-dots button { width: 26px; height: 26px; border-radius: 999px; border: 0; padding: 0; background: transparent; position: relative; }
+.pv-dots button::before { content: ""; position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 999px; background: #3A352D; transition: transform .2s, background .2s; }
+.pv-dots button.done::before { background: #6B5E46; }
+.pv-dots button.cur::before { background: var(--pv-accent); transform: scale(1.6); }
+.pv-dots button.title::before { border-radius: 2px; }
+.pv-dots button:hover::before { background: #B9B09F; }
+.sh-pv button:focus-visible { outline: 2px solid var(--pv-accent); outline-offset: 2px; }
+/* The title card as the presenter's preview shows it. */
+.pv-titleprev { position: absolute; inset: 0; z-index: 5; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: radial-gradient(ellipse 55% 38% at 50% 50%, var(--sh-glow), transparent 70%), var(--sh-gate); color: var(--sh-text); font-family: var(--sh-display); }
+body.on-title .pv-titleprev { display: flex; }
+.pv-titleprev .eyebrow { font-size: 20px !important; letter-spacing: 0.5em; color: var(--sh-muted) !important; margin-bottom: 40px; }
+.pv-titleprev h1 { font-size: 128px; font-weight: var(--sh-title-weight); letter-spacing: calc(var(--sh-head-track) * 1.75); line-height: 1.02; text-transform: var(--sh-head-case); margin: 0; }
+.pv-titleprev .rule { width: 160px; margin: 44px 0 28px; }
+.pv-titleprev .sub { font-style: var(--sh-lede-style); font-size: 40px; color: var(--sh-soft); margin: 0; }
+.pv-titleprev .credit { font-family: var(--sh-ui); font-size: 18px; letter-spacing: 0.42em; text-transform: uppercase; color: var(--sh-muted); margin: 60px 0 0; }
+@media (max-width: 960px) {
+  body.presenter .sh-pv { grid-template-columns: 1fr; grid-template-rows: auto; position: static; min-height: 100%; }
+  .pv-left, .pv-right, .pv-nav { grid-row: auto; }
+  .pv-dots { display: none; }
+}
