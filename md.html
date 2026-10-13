@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="stagehand.css">
 <link rel="stylesheet" id="theme" href="themes/classic.css">
 <style>
-  /* The grid view, used for previews on the make page. */
+  /* The grid view, used for previews on the start page. */
   body.grid { overflow: auto; background: var(--sh-ink); padding: 16px; }
   body.grid .sh-gridwrap { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
   body.grid .sh-thumb { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 6px; background: var(--sh-bg); box-shadow: 0 0 0 1px rgba(127,127,127,0.25); }
@@ -21,6 +21,10 @@
   body.grid .sh-cardthumb h1 { font-size: 128px; font-weight: var(--sh-title-weight); text-transform: var(--sh-head-case); letter-spacing: calc(var(--sh-head-track) * 1.75); margin: 0; line-height: 1.02; }
   body.grid .sh-cardthumb .rule { width: 160px; margin: 44px 0 28px; }
   body.grid .sh-cardthumb .sub { font-size: 40px; font-style: var(--sh-lede-style); color: var(--sh-soft); margin: 0; }
+  /* One slide filling the frame, for the start page's pictures. */
+  body.grid.cover { padding: 0; overflow: hidden; background: var(--sh-bg); }
+  body.grid.cover .sh-gridwrap { display: block; }
+  body.grid.cover .sh-thumb { border-radius: 0; box-shadow: none; }
   body.grid .sh-cardthumb .credit { font-family: var(--sh-ui); font-size: 18px; letter-spacing: 0.42em; text-transform: uppercase; color: var(--sh-muted); margin: 60px 0 0; }
   body.grid .sh-cardthumb aside { display: none; }
   .sh-missing { font: 16px/1.5 Inter, system-ui, sans-serif; color: #EDE6D8; max-width: 560px; margin: 20vh auto; padding: 0 16px; }
@@ -33,13 +37,15 @@
  *
  *   md.html?src=talk.md             a file on the same site
  *   md.html?src=talk.md&theme=paper with a theme, overriding the file's own
- *   md.html?id=…                    a file dropped on make.html, kept in this browser
+ *   md.html?id=…                    a file dropped or pasted on the start page, kept in this browser
  *   md.html?…&view=grid             every slide at once, for previews
+ *   md.html?…&view=cover&n=3        one slide filling the frame, n counts from 0
  */
 import { markdownToDeck, fitSlides, THEMES } from './markdown.js';
 
 const q = new URLSearchParams(location.search);
-const grid = q.get('view') === 'grid';
+const cover = q.get('view') === 'cover';
+const grid = cover || q.get('view') === 'grid';
 let text = null, key = 'example';
 try {
   if (q.get('id')) { key = 'md-' + q.get('id'); text = localStorage.getItem('stagehand:md:' + q.get('id')); }
@@ -48,7 +54,7 @@ try {
 } catch (e) {}
 
 if (text == null) {
-  document.body.innerHTML = '<div class="sh-missing"><p>That deck is not here. Decks dropped on the make page are kept in the browser you dropped them in, so open it there, or drop the file again.</p><p><a style="color:#E2B866" href="make.html">Go to the make page</a></p></div>';
+  document.body.innerHTML = '<div class="sh-missing"><p>That deck is not here. Decks you drop or paste are kept in the browser you used, so open it there, or add the file again.</p><p><a style="color:#E2B866" href="./">Go to Stagehand</a></p></div>';
 } else {
   const { html, meta } = markdownToDeck(text);
   const theme = (q.get('theme') || meta.theme || 'classic').toLowerCase();
@@ -73,6 +79,7 @@ if (text == null) {
     const items = [];
     if (card) { const c = document.createElement('div'); c.className = 'sh-cardthumb'; c.innerHTML = card.innerHTML; items.push(c); }
     for (const s of deck.querySelectorAll(':scope > section')) { const d = document.createElement('div'); d.className = 'deck'; d.appendChild(s); items.push(d); }
+    if (cover) { document.body.classList.add('cover'); const n = Math.min(Math.max(0, +q.get('n') || 0), items.length - 1); items.splice(0, items.length, items[n]); }
     for (const el of items) { const t = document.createElement('div'); t.className = 'sh-thumb'; t.appendChild(el); wrap.appendChild(t); }
     deck.remove(); document.body.appendChild(wrap);
     const size = () => wrap.querySelectorAll('.sh-thumb').forEach(t => { t.firstChild.style.transform = `scale(${t.clientWidth / 1920})`; });

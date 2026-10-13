@@ -1,8 +1,9 @@
 # Stagehand
 
 A two window presentation tool, served by GitHub Pages at
-https://rantbot.github.io/stagehand/ straight from this repository's root. The
-demo deck at `index.html` is also the reference example. `README.md` is the
+https://rantbot.github.io/stagehand/ straight from this repository's root. `index.html` is the start page, where people drop or paste Markdown, pick
+a design and present, with the Claude prompts and the writing guide below it.
+The demo deck at `demo.html` is also the reference example. `README.md` is the
 authoring guide for teammates and for Claude, and `skill/` is the Claude skill.
 
 It is listed in thoughtbot's experiments catalog, whose `content/stagehand/`
@@ -45,7 +46,12 @@ repository and is not part of this experiment.
   content, documented in the README table. Anything smarter, like cutting words
   or choosing between layouts, belongs to the Claude skill in `skill/`, which
   writes Markdown in the same format so both paths meet in one place.
-- **Dropped files stay in the browser.** make.html keeps the Markdown in
+- **The start page replaced make.html in October 2026.** Ran wanted the front
+  door to feel like a landing page for the tool, with the demo one click away
+  and Markdown, pasting, our designs and Claude as equal ways in. `make.html`
+  redirects there, and the demo moved from `index.html` to `demo.html`.
+  `md.html?view=cover&n=` draws one slide for the page's pictures.
+- **Dropped files stay in the browser.** The start page keeps the Markdown in
   localStorage under a hash and opens md.html?id=… so both windows can read it.
   Nothing is uploaded.
 - **Moved to rantbot/stagehand in October 2026.** It lived in

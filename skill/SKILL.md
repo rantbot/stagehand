@@ -17,10 +17,10 @@ choose the layouts. Stagehand handles the look.
 
 1. **A polished Markdown file**, named after the talk, like `onboarding-retro.md`.
    This is the source of truth. It follows the format below exactly, so
-   anyone can drop it on https://rantbot.github.io/stagehand/make.html
+   anyone can drop or paste it on https://rantbot.github.io/stagehand/
    to preview it, change the theme and present.
-2. **A one line link to present it.** Tell them to open the make page above and
-   drop the file in. If they asked for a file they can present directly, also
+2. **A one line link to present it.** Tell them to open the Stagehand page above and
+   drop the file in or paste it. If they asked for a file they can present directly, also
    write the HTML deck described at the end.
 
 Then say in two or three sentences what you changed and what they should check,

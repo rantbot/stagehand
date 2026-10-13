@@ -3,193 +3,555 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Stagehand</title>
+<title>Stagehand · Presentations from Markdown</title>
+<meta name="description" content="Turn a Markdown file into a polished presentation. Your audience sees the slides, you see your script. Free, in the browser, nothing to install.">
+<meta property="og:title" content="Stagehand">
+<meta property="og:description" content="Turn a Markdown file into a polished presentation. Your audience sees the slides, you see your script.">
+<meta property="og:type" content="website">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Inter:wght@400..600&display=swap">
-<link rel="stylesheet" href="stagehand.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@400..600&display=swap">
 <style>
-  /* Anything special to this deck goes here. The kit lives in stagehand.css. */
-  .code { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 25px; line-height: 1.55; color: #D9D1C1; background: #070706; border: 1px solid #2A2620; padding: 36px 44px; white-space: pre; }
-  .code b { color: var(--sh-accent-strong); font-weight: 500; }
-  .code i { color: #7D7466; font-style: normal; }
-  .window { border: 1px solid #3A352D; background: #070706; aspect-ratio: 16 / 7; display: flex; align-items: center; justify-content: center; }
-  .keys { display: grid; grid-template-columns: 220px 1fr; gap: 22px 36px; align-items: baseline; }
-  .keys kbd { font-family: var(--sh-ui); font-size: 22px; letter-spacing: 0.08em; color: var(--sh-text); border: 1px solid #4A4338; border-radius: 6px; padding: 6px 14px; justify-self: start; }
-  .board { position: absolute; left: 1060px; top: 250px; width: 700px; height: 580px; }
-  .board .box { position: absolute; border: 2px solid #6B5E46; display: flex; align-items: center; justify-content: center; font-family: var(--sh-ui); font-size: 20px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sh-muted); }
+  :root {
+    --bg: #0B0A09; --panel: #13110F; --raise: #191714; --line: #2A2620; --edge: #3A352D;
+    --text: #EDE6D8; --soft: #C9C0AF; --muted: #8F877A;
+    --accent: #C9A15A; --accent-strong: #E2B866;
+    --serif: 'Cormorant Garamond', Georgia, serif; --sans: Inter, 'Helvetica Neue', Arial, sans-serif;
+    --mono: ui-monospace, 'SF Mono', Menlo, monospace;
+    color-scheme: dark;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.55 var(--sans); -webkit-font-smoothing: antialiased; }
+  a { color: var(--accent-strong); }
+  code { font-family: var(--mono); font-size: 0.9em; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px; }
+  section[id] { scroll-margin-top: 72px; }
+
+  /* Header */
+  header.top { position: sticky; top: 0; z-index: 10; background: rgba(11,10,9,0.86); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .top-in { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 60px; }
+  .mark { font-family: var(--serif); font-size: 20px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text); text-decoration: none; }
+  .top nav { display: flex; align-items: center; gap: 22px; font-size: 14px; }
+  .top nav a { color: var(--soft); text-decoration: none; }
+  .top nav a:hover { color: var(--text); }
+  @media (max-width: 760px) { .top nav .opt { display: none; } }
+
+  /* Buttons */
+  button, .btn { font: inherit; font-size: 15px; color: var(--text); background: transparent; border: 1px solid var(--edge); border-radius: 8px; padding: 10px 16px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; line-height: 1.2; }
+  button:hover, .btn:hover { border-color: var(--accent); }
+  button:disabled { opacity: 0.4; cursor: default; border-color: var(--edge); }
+  .primary { background: var(--accent); border-color: var(--accent); color: #1A1408; font-weight: 600; }
+  .primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+  .btn.small, button.small { font-size: 14px; padding: 8px 12px; }
+  .top nav .btn { color: var(--text); padding: 7px 12px; font-size: 14px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+  /* Hero */
+  .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 56px; align-items: center; padding: 72px 0 80px; }
+  @media (max-width: 900px) { .hero { grid-template-columns: 1fr; gap: 40px; padding: 48px 0 56px; } }
+  .eyebrow { font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); margin: 0 0 18px; }
+  .hero h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(42px, 6vw, 72px); line-height: 1.02; margin: 0 0 20px; }
+  .hero h1 em { color: var(--accent-strong); }
+  .hero .lede { color: var(--soft); font-size: 19px; max-width: 520px; margin: 0 0 30px; }
+  .hero .fine { color: var(--muted); font-size: 14px; margin: 18px 0 0; }
+
+  /* Two windows */
+  .windows { position: relative; padding-bottom: 18%; }
+  .win { border: 1px solid var(--edge); border-radius: 10px; overflow: hidden; background: #070706; box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
+  .win-bar { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: #161411; border-bottom: 1px solid var(--line); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  .win-bar i { width: 8px; height: 8px; border-radius: 50%; background: #3A352D; }
+  .win-bar span { margin-left: 8px; }
+  .win.shared iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; background: #0D0C0A; pointer-events: none; }
+  .win.notes { position: absolute; right: -4%; bottom: 0; width: 58%; }
+  .notes-body { padding: 14px 16px 16px; display: grid; grid-template-columns: 1fr 34%; gap: 12px; }
+  .notes-body p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--text); }
+  .notes-body .cue { display: inline-block; font-size: 10px; letter-spacing: 0.1em; color: #1A1408; background: var(--accent-strong); border-radius: 3px; padding: 1px 5px; margin-right: 4px; }
+  .notes-side { display: flex; flex-direction: column; gap: 8px; }
+  .notes-side .next { aspect-ratio: 16 / 9; border-radius: 4px; background: #F3EEE4; border: 1px solid var(--edge); padding: 8px; }
+  .notes-side .next b { display: block; height: 5px; width: 60%; background: #1C1A16; border-radius: 2px; margin-top: 6px; }
+  .notes-side .next b + b { width: 40%; background: #A39C8E; }
+  .notes-side .timer { font-family: var(--mono); font-size: 18px; color: var(--accent-strong); }
+  .win-label { position: absolute; font-size: 12px; color: var(--muted); }
+  @media (max-width: 900px) { .win.notes { right: 0; } }
+  @media (max-width: 600px) { .windows { padding-bottom: 0; } .win.notes { position: relative; width: 88%; margin: -14% 0 0 auto; } .notes-body { grid-template-columns: 1fr; } .notes-side .next { display: none; } }
+
+  /* Sections */
+  .band { border-top: 1px solid var(--line); padding: 72px 0; }
+  .band h2 { font-family: var(--serif); font-weight: 400; font-size: clamp(34px, 4.5vw, 48px); line-height: 1.08; margin: 0 0 12px; }
+  .band .intro { color: var(--soft); font-size: 18px; max-width: 680px; margin: 0 0 36px; }
+
+  /* Ways in */
+  .ways { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  @media (max-width: 860px) { .ways { grid-template-columns: 1fr; } }
+  .way { display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 24px; text-decoration: none; color: var(--text); transition: border-color .2s, transform .2s; }
+  .way:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .way .n { font-family: var(--serif); font-size: 40px; line-height: 1; color: var(--accent-strong); margin-bottom: 14px; }
+  .way h3 { font-size: 19px; font-weight: 600; margin: 0 0 8px; }
+  .way p { color: var(--soft); margin: 0 0 18px; flex: 1; }
+  .way .go { font-size: 14px; color: var(--accent-strong); }
+
+  /* Make a deck */
+  .maker { display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 24px; align-items: start; }
+  @media (max-width: 900px) { .maker { grid-template-columns: 1fr; } }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 22px; }
+  .side > .panel + .panel { margin-top: 14px; }
+  .step { font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+  .tabs { display: flex; gap: 4px; padding: 4px; background: #0E0D0B; border: 1px solid var(--line); border-radius: 9px; margin-bottom: 14px; }
+  .tabs button { flex: 1; border: 0; border-radius: 6px; padding: 8px 10px; font-size: 14px; color: var(--soft); }
+  .tabs button[aria-selected="true"] { background: var(--raise); color: var(--text); box-shadow: inset 0 0 0 1px var(--edge); }
+  .drop { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; min-height: 168px; border: 1.5px dashed #4A4338; border-radius: 10px; padding: 18px; cursor: pointer; transition: border-color .2s, background .2s; }
+  .drop:hover, .drop.over { border-color: var(--accent); background: rgba(201,161,90,0.06); }
+  .drop:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 2px; }
+  .drop b { font-weight: 600; }
+  .drop span { color: var(--muted); font-size: 14px; }
+  .drop.has { border-style: solid; border-color: var(--edge); }
+  textarea { display: block; width: 100%; min-height: 168px; background: #0E0D0B; color: var(--text); border: 1px solid var(--edge); border-radius: 10px; padding: 12px; font: 13px/1.5 var(--mono); resize: vertical; }
+  textarea:focus { outline: none; border-color: var(--accent); }
+  .alt { font-size: 14px; color: var(--muted); margin: 12px 0 0; }
+  .alt button { font-size: 14px; padding: 0; border: 0; color: var(--accent-strong); text-decoration: underline; text-underline-offset: 3px; }
+  .themes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .theme { position: relative; display: block; cursor: pointer; }
+  .theme input { position: absolute; opacity: 0; }
+  .theme .sw { display: block; aspect-ratio: 16 / 9; border-radius: 8px; border: 1px solid var(--edge); padding: 10px; overflow: hidden; }
+  .theme .sw i { display: block; height: 7px; border-radius: 2px; margin-bottom: 6px; }
+  .theme .name { display: block; font-size: 14px; margin-top: 7px; }
+  .theme .note { display: block; font-size: 12px; color: var(--muted); }
+  .theme input:checked + .sw { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .theme input:focus-visible + .sw { outline: 2px solid var(--accent-strong); outline-offset: 2px; }
+  .sw.classic { background: #0D0C0A; } .sw.classic i:nth-child(1) { width: 30%; background: #C9A15A; height: 4px; } .sw.classic i:nth-child(2) { width: 75%; background: #EDE6D8; } .sw.classic i:nth-child(3) { width: 55%; background: #6E665A; }
+  .sw.paper { background: #F3EEE4; } .sw.paper i:nth-child(1) { width: 30%; background: #B3402A; height: 4px; } .sw.paper i:nth-child(2) { width: 75%; background: #1C1A16; } .sw.paper i:nth-child(3) { width: 55%; background: #A39C8E; }
+  .sw.signal { background: linear-gradient(90deg, #111116 62%, #FF5A36 62%); } .sw.signal i:nth-child(1) { width: 30%; background: #FF5A36; height: 4px; } .sw.signal i:nth-child(2) { width: 52%; background: #fff; height: 9px; } .sw.signal i:nth-child(3) { width: 40%; background: #5B5C70; }
+  .sw.auto { background: linear-gradient(115deg, #0D0C0A 0 34%, #F3EEE4 34% 67%, #111116 67%); } .sw.auto i { width: 40%; background: #C9A15A; height: 4px; } .sw.auto i + i { display: none; }
+  .status { font-size: 14px; color: var(--soft); margin: 12px 0 0; min-height: 1.5em; }
+  .preview { padding: 0; overflow: hidden; }
+  .preview-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+  .preview iframe { display: block; width: 100%; height: 480px; border: 0; background: #0B0A09; }
+  .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; min-height: 480px; padding: 28px; text-align: center; color: var(--muted); }
+  .empty .ghost { display: grid; grid-template-columns: repeat(3, 72px); gap: 8px; opacity: 0.6; }
+  .empty .ghost i { aspect-ratio: 16 / 9; border: 1px dashed #4A4338; border-radius: 4px; }
+
+  /* Templates */
+  .tpls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+  @media (max-width: 900px) { .tpls { grid-template-columns: 1fr; } }
+  .tpl { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+  .tpl .shot { position: relative; aspect-ratio: 16 / 9; border-bottom: 1px solid var(--line); background: #0D0C0A; }
+  .tpl .shot iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; }
+  .tpl .body { padding: 20px 20px 22px; display: flex; flex-direction: column; flex: 1; }
+  .tpl h3 { font-size: 19px; font-weight: 600; margin: 0 0 4px; }
+  .tpl .for { font-size: 13px; color: var(--muted); margin: 0 0 10px; }
+  .tpl p { color: var(--soft); margin: 0 0 18px; flex: 1; }
+  .more { color: var(--muted); font-size: 15px; margin: 24px 0 0; }
+
+  /* Claude */
+  .claude { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 32px; align-items: start; }
+  @media (max-width: 900px) { .claude { grid-template-columns: 1fr; } }
+  .claude ol { margin: 0; padding: 0; list-style: none; counter-reset: s; }
+  .claude ol li { counter-increment: s; display: grid; grid-template-columns: 36px 1fr; gap: 12px; color: var(--soft); }
+  .claude ol li + li { margin-top: 18px; }
+  .claude ol li::before { content: counter(s); font-family: var(--serif); font-size: 28px; line-height: 1; color: var(--accent-strong); }
+  .claude ol b { color: var(--text); font-weight: 600; display: block; margin-bottom: 2px; }
+  .prompts { display: grid; gap: 14px; }
+  .prompt { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+  .prompt-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .prompt-head h3 { font-size: 16px; font-weight: 600; margin: 0; }
+  .prompt-head small { display: block; font-size: 13px; font-weight: 400; color: var(--muted); }
+  .prompt pre { margin: 0; background: #0E0D0B; border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; font: 13.5px/1.6 var(--mono); color: var(--soft); white-space: pre-wrap; }
+  .prompt pre mark { background: rgba(201,161,90,0.18); color: var(--accent-strong); border-radius: 3px; padding: 0 3px; }
+
+  /* Writing */
+  .rules { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  .rule { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+  .rule pre { margin: 0 0 10px; font: 13px/1.5 var(--mono); color: var(--accent-strong); white-space: pre-wrap; }
+  .rule p { margin: 0; font-size: 14px; color: var(--soft); }
+
+  /* Footer */
+  footer { border-top: 1px solid var(--line); padding: 32px 0 48px; color: var(--muted); font-size: 14px; }
+  footer .row { justify-content: space-between; }
+  footer nav { display: flex; gap: 20px; flex-wrap: wrap; }
+  footer a { color: var(--soft); text-decoration: none; }
+  footer a:hover { color: var(--text); }
 </style>
 </head>
 <body>
 
-<div class="deck" data-title="Stagehand" data-length="5">
+<header class="top">
+  <div class="wrap top-in">
+    <a class="mark" href="./">Stagehand</a>
+    <nav aria-label="Site">
+      <a class="opt" href="#templates">Templates</a>
+      <a class="opt" href="#claude">With Claude</a>
+      <a class="opt" href="#write">How to write it</a>
+      <a class="btn" href="demo.html" data-demo>Watch the demo</a>
+    </nav>
+  </div>
+</header>
 
-  <header class="title-card">
-    <p class="eyebrow">An experiment · thoughtbot</p>
-    <h1>Stagehand</h1>
-    <hr class="rule">
-    <p class="sub">One window for the room. One for you.</p>
-    <p class="credit">A presentation tool you can read in an afternoon</p>
-    <aside>This card stays up while people settle. Press Begin when you are ready.</aside>
-  </header>
-
-  <section data-title="Two windows">
-    <p class="eyebrow">How it works</p>
-    <h2>Two windows</h2>
-    <div class="columns" style="margin-top:24px">
-      <div class="card">
-        <div class="window"><span class="caption">The slides</span></div>
-        <h3>The one you share</h3>
-        <p>Just the slides, full screen. No controls, no notes, nothing to hide.</p>
+<main>
+<div class="wrap">
+  <section class="hero">
+    <div>
+      <p class="eyebrow">A presentation tool from thoughtbot</p>
+      <h1>Write it in Markdown.<br><em>Present it</em> like you meant it.</h1>
+      <p class="lede">Bring a Markdown file, or paste one in, and Stagehand lays out every slide for you. Your audience sees the slides. You get a second window with your script, the next slide and a timer.</p>
+      <div class="row">
+        <a class="btn primary" href="#start">Start with your Markdown</a>
+        <a class="btn" href="demo.html" data-demo>Watch the demo</a>
       </div>
-      <div class="card">
-        <div class="window"><span class="caption">Your script · next slide · timer</span></div>
-        <h3>The one you keep</h3>
-        <p>Your script, the next slide, a timer, and every control.</p>
+      <p class="fine">Free, in your browser, nothing to install. Your file never leaves this computer.</p>
+    </div>
+
+    <div class="windows" aria-hidden="true">
+      <div class="win shared">
+        <div class="win-bar"><i></i><i></i><i></i><span>What you share</span></div>
+        <iframe src="md.html?src=example.md&amp;theme=classic&amp;view=cover&amp;n=5" title="" tabindex="-1" loading="lazy"></iframe>
       </div>
-    </div>
-    <aside>Stagehand runs a talk across two windows. The one you share on a call or a projector shows only the slides. The one you keep has your script, a preview of what comes next, a timer, and every button.
-
-They stay in step on their own. Click Next in either one and both move.
-
-NOTE: This deck is the demo and the template at once. View the source to see how each slide is written.</aside>
-  </section>
-
-  <section data-title="A slide is a section">
-    <p class="eyebrow">Writing a deck</p>
-    <h2>A slide is a section</h2>
-    <pre class="code"><i>&lt;!-- everything inside the section is the slide --&gt;</i>
-&lt;<b>section</b> data-title="Two windows"&gt;
-  &lt;p class="eyebrow"&gt;How it works&lt;/p&gt;
-  &lt;h2&gt;Two windows&lt;/h2&gt;
-
-  <i>&lt;!-- and the aside is what you say --&gt;</i>
-  &lt;<b>aside</b>&gt;Stagehand runs a talk across two windows.&lt;/aside&gt;
-&lt;/section&gt;</pre>
-    <aside>Each slide is a section in one HTML file. Whatever is inside it is the slide, laid out on a 1920 by 1080 canvas, so it looks the same on a laptop and a projector.
-
-The aside is your script. It never shows on the shared screen. It shows, large, in your window.
-
-Any line in the aside that starts with a capital label and a colon, like NOTE: or SOURCES:, is kept out of your script. Use those for reminders to yourself.</aside>
-  </section>
-
-  <section data-title="Reveals">
-    <p class="eyebrow">One thing at a time</p>
-    <h2>Reveals</h2>
-    <ol class="points narrow" style="margin-top:20px">
-      <li class="reveal"><p>Add <code>class="reveal"</code> to anything on a slide.</p></li>
-      <li class="reveal"><p>Write <code>(click)</code> in your script where it should appear.</p></li>
-      <li class="reveal"><p>Next reveals them in order, then moves on.</p></li>
-    </ol>
-    <aside>Anything with the reveal class stays hidden until you click.
-
-(click) Mark it with class reveal.
-
-(click) Then write the word click in brackets in your script, where you want it to appear. In your window that turns into a numbered button, so you can see exactly where you are.
-
-(click) Next reveals them in order, and once they are all showing, it moves to the next slide.</aside>
-  </section>
-
-  <section data-title="Spotlight">
-    <p class="eyebrow">Pointing at things</p>
-    <h2 class="narrow">Spotlight</h2>
-    <p class="narrow" style="max-width:780px">Add <code>only</code> to a reveal and it shows for its own click, then steps aside for the next. Put a ring on it to circle part of a diagram as you talk.</p>
-    <div class="board">
-      <div class="box" style="left:0;top:0;width:320px;height:250px">Inbox</div>
-      <div class="box" style="left:380px;top:0;width:320px;height:250px">Review</div>
-      <div class="box" style="left:0;top:320px;width:700px;height:260px">Shipped</div>
-    </div>
-    <div class="ring reveal only" style="left:1020px;top:215px;width:400px;height:320px"></div>
-    <div class="ring reveal only" style="left:1400px;top:215px;width:400px;height:320px"></div>
-    <div class="ring reveal only" style="left:1000px;top:530px;width:820px;height:340px"></div>
-    <aside>Sometimes you want to point at one part of a picture at a time.
-
-(click) Work arrives in the inbox. (click) Someone reviews it. (click) And then it ships.
-
-Each ring is a reveal with the only class, so it shows for its own click and steps aside for the next.</aside>
-  </section>
-
-  <section data-title="Photos">
-    <div class="photo right"><img src="sample.svg" alt="An abstract amber light falling across a dark counter"></div>
-    <div class="over-photo" style="display:flex;flex-direction:column;gap:28px">
-      <p class="eyebrow">Layouts</p>
-      <h2>Photos drift</h2>
-      <div class="rows">
-        <span>Full bleed</span><span><code>class="photo"</code></span>
-        <span>Right side</span><span><code>class="photo right"</code></span>
-        <span>Darker</span><span><code>class="photo shade"</code></span>
-        <span>Hold still</span><span><code>class="photo still"</code></span>
+      <div class="win notes">
+        <div class="win-bar"><i></i><i></i><i></i><span>What you see</span></div>
+        <div class="notes-body">
+          <p><span class="cue">click</span> Two thirds of people finish setup now. <span class="cue">click</span> They reach a first project in about a day.</p>
+          <div class="notes-side"><div class="next"><b></b><b></b></div><span class="timer">03:12</span></div>
+        </div>
       </div>
     </div>
-    <aside>Put an image in a photo box and it fills its space and drifts slowly, the way a documentary holds on a still.
-
-The labels and values here line up in two columns whatever their length. That is the rows class.</aside>
   </section>
-
-  <section data-title="Numbers">
-    <p class="eyebrow">Making a point</p>
-    <h2>One number at a time</h2>
-    <div class="columns" style="margin-top:40px;max-width:1300px">
-      <div class="stat"><b>48%</b><p>of people with a regular spot talk to someone new at least monthly</p></div>
-      <div class="stat reveal"><b style="color:var(--sh-muted)">28%</b><p>of people without one</p></div>
-    </div>
-    <p class="caption" style="margin-top:40px">Sample figures, from the deck Stagehand was built for</p>
-    <aside>A stat lands harder when the comparison arrives a beat later.
-
-(click) The second number is a reveal, so you say the first, pause, and then show the second.</aside>
-  </section>
-
-  <section data-title="Sound">
-    <p class="eyebrow">Optional</p>
-    <h2>Sound and narration</h2>
-    <div class="rows" style="margin-top:24px;grid-template-columns:420px 1fr">
-      <span>A bed under a slide</span><span><code>data-sound="room.mp3"</code></span>
-      <span>A voice over a slide</span><span><code>data-voice="intro.mp3"</code></span>
-      <span>A voice over the title</span><span>the same, on the title card</span>
-    </div>
-    <p class="narrow" style="margin-top:24px">Beds crossfade between slides and dip while a voice plays. Volume and mute live in your window.</p>
-    <aside>Sound is optional, and this demo has none.
-
-Put data-sound on a slide and a recording loops quietly under it. Slides that share a recording carry it through without a seam.
-
-Put data-voice on a slide, or on the title card, and a recording plays once when you arrive, with the room tone dipping underneath. A recorded narrator over the title card makes a strong cold open.</aside>
-  </section>
-
-  <section data-title="Presenting">
-    <p class="eyebrow">On the day</p>
-    <h2>Presenting</h2>
-    <div class="keys" style="margin-top:28px">
-      <kbd>Click</kbd><p>The shared window once: sound on, your window opens</p>
-      <kbd>Click again</kbd><p>Full screen</p>
-      <kbd>→ or a clicker</kbd><p>Next, in either window</p>
-      <kbd>F · M · P</kbd><p>Full screen, mute, open your window</p>
-    </div>
-    <aside>Open the deck and click it once. That turns the sound on and opens your window. Click it once more to go full screen, then share it.
-
-From then on, drive everything from your window, or from a clicker. The dots along the bottom jump to any slide. Edit lets you rewrite your script on the spot, and keeps your changes in that browser.
-
-If you refresh by accident, it comes back to the same slide.</aside>
-  </section>
-
-  <section data-title="Make your own">
-    <p class="eyebrow">Your turn</p>
-    <h2>Make your own</h2>
-    <ol class="points narrow" style="margin-top:20px">
-      <li><p>Drop a Markdown file on <code>make.html</code>.</p></li>
-      <li><p>Or hand it to Claude with the Stagehand skill.</p></li>
-      <li><p>Or copy the <code>app</code> folder and write the HTML yourself.</p></li>
-    </ol>
-    <aside>The quickest way to make your own is to write it in Markdown and drop the file on the make page. Each slide picks its own layout, and you choose Classic, Paper or Signal.
-
-For more polish, hand the same file to Claude with the Stagehand skill. It tightens the words and moves the rest into your script.
-
-And if you want full control, copy the app folder and start from blank.html or one of the templates.
-
-And tell us what broke, or what you wished it did.</aside>
-  </section>
-
 </div>
 
-<script type="module" src="stagehand.js"></script>
+<section class="band" id="ways">
+  <div class="wrap">
+    <h2>Three ways to make a deck</h2>
+    <p class="intro">Start with whatever you have. They all end up as the same kind of deck, so you can switch paths at any point.</p>
+    <div class="ways">
+      <a class="way" href="#start">
+        <span class="n">1</span>
+        <h3>Use your Markdown as it is</h3>
+        <p>Drop a file or paste it in. Each slide gets a layout from what is on it, and you can present it right away.</p>
+        <span class="go">Make a deck →</span>
+      </a>
+      <a class="way" href="#templates">
+        <span class="n">2</span>
+        <h3>Pick one of our designs</h3>
+        <p>Classic, Paper and Signal each give your Markdown a finished look. Switch between them in one click.</p>
+        <span class="go">See the templates →</span>
+      </a>
+      <a class="way" href="#claude">
+        <span class="n">3</span>
+        <h3>Ask Claude for more</h3>
+        <p>Hand your file to Claude with the Stagehand skill to tighten the words, or to restyle the whole deck around your brand.</p>
+        <span class="go">Use it with Claude →</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="start">
+  <div class="wrap">
+    <h2>Make a deck</h2>
+    <p class="intro">Add your Markdown, pick a look, then present it or save it as one HTML file.</p>
+
+    <div class="maker">
+      <div class="side">
+        <div class="panel">
+          <p class="step">1 · Your Markdown</p>
+          <div class="tabs" role="tablist" aria-label="How to add your Markdown">
+            <button type="button" role="tab" id="tabFile" aria-selected="true" aria-controls="paneFile">Upload a file</button>
+            <button type="button" role="tab" id="tabPaste" aria-selected="false" aria-controls="panePaste">Paste it in</button>
+          </div>
+          <div id="paneFile" role="tabpanel" aria-labelledby="tabFile">
+            <label class="drop" id="drop" tabindex="0">
+              <b id="dropTitle">Drop a .md file here</b>
+              <span id="dropNote">or click to choose one</span>
+              <input type="file" id="file" accept=".md,.markdown,.txt,text/markdown,text/plain" hidden>
+            </label>
+          </div>
+          <div id="panePaste" role="tabpanel" aria-labelledby="tabPaste" hidden>
+            <textarea id="text" spellcheck="false" aria-label="Your Markdown" placeholder="# My talk&#10;&#10;---&#10;&#10;## First slide&#10;&#10;A line or two.&#10;&#10;Notes: What you say."></textarea>
+          </div>
+          <p class="alt">No file handy? <button type="button" id="example">Try our example</button> or <a href="example.md" download>download it</a> to start from.</p>
+        </div>
+
+        <div class="panel">
+          <p class="step">2 · A look</p>
+          <div class="themes" role="radiogroup" aria-label="Design">
+            <label class="theme"><input type="radio" name="theme" value="auto" checked><span class="sw auto"><i></i><i></i><i></i></span><span class="name">From the file</span><span class="note">Its theme line, or Classic</span></label>
+            <label class="theme"><input type="radio" name="theme" value="classic"><span class="sw classic"><i></i><i></i><i></i></span><span class="name">Classic</span><span class="note">Dark and warm</span></label>
+            <label class="theme"><input type="radio" name="theme" value="paper"><span class="sw paper"><i></i><i></i><i></i></span><span class="name">Paper</span><span class="note">Light, editorial</span></label>
+            <label class="theme"><input type="radio" name="theme" value="signal"><span class="sw signal"><i></i><i></i><i></i></span><span class="name">Signal</span><span class="note">Bold, bright</span></label>
+          </div>
+        </div>
+
+        <div class="panel">
+          <p class="step">3 · Present or keep it</p>
+          <div class="row">
+            <button type="button" class="primary" id="present" disabled>Present</button>
+            <button type="button" id="save" disabled>Save as HTML</button>
+          </div>
+          <p class="status" id="status">Your Markdown stays in this browser. Nothing is uploaded.</p>
+        </div>
+      </div>
+
+      <div class="panel preview" id="preview">
+        <div class="preview-head"><span id="previewTitle">Preview</span><span id="previewCount"></span></div>
+        <div class="empty" id="empty">
+          <div class="ghost"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <p>Your slides show up here as soon as you add some Markdown.</p>
+        </div>
+        <iframe id="frame" title="Slide preview" hidden></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="templates">
+  <div class="wrap">
+    <h2>Our designs</h2>
+    <p class="intro">Three finished looks that work with any Markdown file. Each one is also a complete sample deck you can open and copy.</p>
+    <div class="tpls">
+      <article class="tpl">
+        <div class="shot"><iframe data-src="md.html?src=example.md&amp;theme=classic&amp;view=cover&amp;n=0" title="" tabindex="-1" aria-hidden="true"></iframe></div>
+        <div class="body">
+          <h3>Classic</h3>
+          <p class="for">Story talks, demos, lightning talks</p>
+          <p>Dark and warm, with a serif display face and a quiet gold accent. It feels like a documentary.</p>
+          <div class="row">
+            <button type="button" class="primary small" data-use="classic">Use with my Markdown</button>
+            <a class="btn small" href="demo.html" data-demo>See a full deck</a>
+          </div>
+        </div>
+      </article>
+      <article class="tpl">
+        <div class="shot"><iframe data-src="md.html?src=example.md&amp;theme=paper&amp;view=cover&amp;n=0" title="" tabindex="-1" aria-hidden="true"></iframe></div>
+        <div class="body">
+          <h3>Paper</h3>
+          <p class="for">Retros, case studies, research</p>
+          <p>Light paper, a bookish serif and one red accent. It reads like a well made report.</p>
+          <div class="row">
+            <button type="button" class="primary small" data-use="paper">Use with my Markdown</button>
+            <a class="btn small" href="template-paper.html" data-template="paper">See a full deck</a>
+          </div>
+        </div>
+      </article>
+      <article class="tpl">
+        <div class="shot"><iframe data-src="md.html?src=example.md&amp;theme=signal&amp;view=cover&amp;n=0" title="" tabindex="-1" aria-hidden="true"></iframe></div>
+        <div class="body">
+          <h3>Signal</h3>
+          <p class="for">Updates, pitches, kickoffs</p>
+          <p>Big type, one loud color and section slides that flood the screen. It gets attention fast.</p>
+          <div class="row">
+            <button type="button" class="primary small" data-use="signal">Use with my Markdown</button>
+            <a class="btn small" href="template-signal.html" data-template="signal">See a full deck</a>
+          </div>
+        </div>
+      </article>
+    </div>
+    <p class="more">Want a look of your own, like a client's brand? <a href="#claude">Ask Claude to design one</a>, or set a few color and type variables yourself, as the <a href="https://github.com/rantbot/stagehand#your-own-look">guide</a> shows.</p>
+  </div>
+</section>
+
+<section class="band" id="claude">
+  <div class="wrap">
+    <h2>Make bigger changes with Claude</h2>
+    <p class="intro">The browser follows simple rules. Claude can use judgment. With the Stagehand skill it rewrites slides, moves detail into your script and can design a deck from scratch.</p>
+    <div class="claude">
+      <ol>
+        <li><div><b>Add the skill</b>Download the <a href="https://github.com/rantbot/stagehand/tree/main/skill">Stagehand skill</a> and add it to Claude, or copy its folder into <code>.claude/skills/</code>.</div></li>
+        <li><div><b>Attach your Markdown</b>Any notes, outline or draft will do. Then send one of the prompts here, changed to fit your talk.</div></li>
+        <li><div><b>Present what comes back</b>Drop the Markdown it returns into <a href="#start">Make a deck</a>, or open the HTML file it writes.</div></li>
+      </ol>
+      <div class="prompts">
+        <div class="prompt">
+          <div class="prompt-head"><h3>Polish my deck<small>Same design, better slides</small></h3><button type="button" class="small" data-copy="p1">Copy</button></div>
+          <pre id="p1">Use the Stagehand skill to turn my attached Markdown into a polished presentation. Keep the words on each slide short and move the rest into my notes. Use the <mark>Paper</mark> theme. The talk is about <mark>10</mark> minutes.</pre>
+        </div>
+        <div class="prompt">
+          <div class="prompt-head"><h3>Redesign it<small>A new look built for this talk</small></h3><button type="button" class="small" data-copy="p2">Copy</button></div>
+          <pre id="p2">Use the Stagehand skill to turn my attached Markdown into a presentation, written as one HTML file. Design a new look for it with its own colors, type and motion, inspired by <mark>our brand: deep navy, coral accents, a confident sans serif</mark>. Add reveals where I build an argument and keep everything I say in my notes.</pre>
+        </div>
+        <div class="prompt">
+          <div class="prompt-head"><h3>Start from nothing<small>An outline becomes a talk</small></h3><button type="button" class="small" data-copy="p3">Copy</button></div>
+          <pre id="p3">Use the Stagehand skill to write a <mark>five minute</mark> talk about <mark>what we learned rebuilding onboarding</mark> from my attached notes. Give it a clear opening, three sections and a closing ask. Use placeholders for any figures I have not given you.</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="write">
+  <div class="wrap">
+    <h2>How to write it</h2>
+    <p class="intro">Plain Markdown. Put a line with three dashes between slides, or leave them out and each <code>#</code> or <code>##</code> heading starts a new one. The layout comes from what is on the slide.</p>
+    <div class="rules">
+      <div class="rule"><pre>---
+title: My talk
+subtitle: One line on it
+author: Your name
+theme: paper
+length: 5
+---</pre><p>Optional settings at the very top. Length is in minutes, for your timer.</p></div>
+      <div class="rule"><pre># My talk</pre><p>The first slide, if it is just a big heading, is the title card. Later, a slide with only a heading opens a section. Start it with a number, like <code># 1. Why</code>, for a big section number.</p></div>
+      <div class="rule"><pre>### The problem
+## People stall on step three</pre><p>A small heading above the main one becomes the label over it.</p></div>
+      <div class="rule"><pre>Notes: What you say here.
+&lt;!-- or in a comment --&gt;</pre><p>Your script, shown only in your window. Write <code>(click)</code> where the next thing should appear.</p></div>
+      <div class="rule"><pre>- **68%** finish setup
+- **1.1** days to a first project</pre><p>A list where every line starts with a number becomes big stats.</p></div>
+      <div class="rule"><pre>&gt; The quote itself.
+&gt; — Who said it</pre><p>A quote on its own becomes a pull quote, with the dash line as its credit.</p></div>
+      <div class="rule"><pre>![A view of the office](office.jpg)</pre><p>A picture alone fills the slide. With other things it sits on the right.</p></div>
+      <div class="rule"><pre>### Keep
+One line.
+### Change
+One line.</pre><p>Two to four small headings, each with something under it, become cards.</p></div>
+      <div class="rule"><pre>- **Team**: Three people
+- **Length**: Eight weeks</pre><p>Label and value lines line up in two columns.</p></div>
+      <div class="rule"><pre>One sentence, nothing else.</pre><p>Becomes a big statement. Tables and code blocks work too, and slides with lots of words get smaller type on their own.</p></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap row">
+    <span>Stagehand is one of thoughtbot's experiments, made by Ran Craycraft.</span>
+    <nav aria-label="More">
+      <a href="demo.html" data-demo>Demo</a>
+      <a href="https://github.com/rantbot/stagehand#readme">Guide</a>
+      <a href="https://github.com/rantbot/stagehand">GitHub</a>
+    </nav>
+  </div>
+</footer>
+
+<script type="module">
+import { markdownToDeck, THEMES } from './markdown.js';
+import { track } from './experiments-web.js';
+
+const $ = id => document.getElementById(id);
+const drop = $('drop'), file = $('file'), text = $('text'), frame = $('frame');
+let md = '', name = 'deck';
+const STORE = 'stagehand:make:last';
+
+const hash = s => { let h = 5381; for (let i = 0; i < s.length; i++) h = (h * 33 ^ s.charCodeAt(i)) >>> 0; return h.toString(36); };
+const theme = () => document.querySelector('input[name=theme]:checked').value;
+const themeFor = () => { const t = theme(); if (t !== 'auto') return t; const m = markdownToDeck(md).meta.theme; return THEMES[(m || '').toLowerCase()] ? m.toLowerCase() : 'classic'; };
+const keep = () => { const id = hash(md); try { localStorage.setItem('stagehand:md:' + id, md); localStorage.setItem(STORE, JSON.stringify({ md, name })); } catch (e) {} return id; };
+
+/* The two ways in */
+function showTab(paste) {
+  $('tabFile').setAttribute('aria-selected', String(!paste));
+  $('tabPaste').setAttribute('aria-selected', String(paste));
+  $('paneFile').hidden = paste; $('panePaste').hidden = !paste;
+  if (paste) text.focus();
+}
+$('tabFile').addEventListener('click', () => showTab(false));
+$('tabPaste').addEventListener('click', () => showTab(true));
+
+let timer;
+function use(src, from) {
+  md = src; if (from) name = from.replace(/\.(md|markdown|txt)$/i, '') || 'deck';
+  if (text.value !== md) text.value = md;
+  const ok = md.trim().length > 0;
+  $('present').disabled = $('save').disabled = !ok;
+  if (!ok) { frame.hidden = true; $('empty').hidden = false; $('previewTitle').textContent = 'Preview'; $('previewCount').textContent = ''; return; }
+  const { meta } = markdownToDeck(md);
+  drop.classList.add('has');
+  $('dropTitle').textContent = from || meta.title;
+  $('dropNote').textContent = 'Drop another to replace it';
+  $('previewTitle').textContent = meta.title;
+  $('previewCount').textContent = `${meta.slides} ${meta.slides === 1 ? 'slide' : 'slides'}`;
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    const id = keep();
+    frame.style.height = '';
+    frame.src = `md.html?id=${id}&theme=${themeFor()}&view=grid`;
+    frame.hidden = false; $('empty').hidden = true;
+  }, 250);
+}
+
+async function readFile(f) {
+  if (!f) return;
+  use(await f.text(), f.name);
+  showTab(false);
+  track('made-a-deck-from-markdown');
+}
+drop.addEventListener('click', e => { if (e.target !== file) file.click(); });
+drop.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); file.click(); } });
+file.addEventListener('change', () => readFile(file.files[0]));
+['dragenter', 'dragover'].forEach(t => addEventListener(t, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(t => addEventListener(t, e => { e.preventDefault(); if (t === 'drop' || !e.relatedTarget) drop.classList.remove('over'); }));
+addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) { readFile(f); $('start').scrollIntoView(); } });
+
+$('example').addEventListener('click', async () => { const r = await fetch('example.md'); use(await r.text(), 'example.md'); });
+let pasted = false;
+text.addEventListener('input', () => {
+  use(text.value);
+  if (!pasted && text.value.trim()) { pasted = true; track('pasted-markdown'); }
+});
+document.querySelectorAll('input[name=theme]').forEach(r => r.addEventListener('change', () => { if (md) use(md); }));
+addEventListener('message', e => { if (e.data?.type === 'stagehand-grid' && e.source === frame.contentWindow) frame.style.height = Math.max(480, e.data.height) + 'px'; });
+
+/* Templates pick the look and send you to make a deck */
+document.querySelectorAll('[data-use]').forEach(b => b.addEventListener('click', () => {
+  document.querySelector(`input[name=theme][value=${b.dataset.use}]`).checked = true;
+  if (md) use(md);
+  $('start').scrollIntoView();
+  $('status').textContent = md ? `Showing your deck in ${b.closest('.tpl').querySelector('h3').textContent}.` : 'Now add your Markdown, or try our example.';
+  track('picked-a-template');
+}));
+document.querySelectorAll('[data-demo]').forEach(a => a.addEventListener('click', () => track('opened-the-demo')));
+
+/* Template pictures load once they are near the screen */
+const shots = new IntersectionObserver(entries => entries.forEach(e => {
+  if (!e.isIntersecting) return;
+  e.target.src = e.target.dataset.src; shots.unobserve(e.target);
+}), { rootMargin: '400px' });
+document.querySelectorAll('iframe[data-src]').forEach(f => shots.observe(f));
+
+$('present').addEventListener('click', () => {
+  const id = keep();
+  window.open(`md.html?id=${id}&theme=${themeFor()}`, '_blank');
+  $('status').textContent = 'Opened in a new tab. Click the slides once to start, and your notes window opens.';
+});
+
+$('save').addEventListener('click', () => {
+  const { html, meta } = markdownToDeck(md);
+  const base = new URL('.', location.href).href;
+  const t = themeFor();
+  const page = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${meta.title.replace(/</g, '&lt;')}</title>
+<!-- Made with Stagehand from Markdown. Edit the slides below, or add the Markdown at ${base} again. -->
+<link rel="icon" href="${base}favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="${base}stagehand.css">
+<link rel="stylesheet" href="${base}themes/${t}.css">
+</head>
+<body>
+
+${html}
+
+<script type="module" src="${base}stagehand.js"><\/script>
+</body>
+</html>
+`;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([page], { type: 'text/html' }));
+  a.download = (name || 'deck').replace(/[^\w.-]+/g, '-') + '.html';
+  a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  $('status').textContent = 'Saved. Open it from any web server, like GitHub Pages, and it presents the same way. Pictures need to sit beside it.';
+  track('saved-a-deck-as-html');
+});
+
+document.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', async () => {
+  const label = b.textContent;
+  try { await navigator.clipboard.writeText($(b.dataset.copy).textContent); b.textContent = 'Copied'; } catch (e) { b.textContent = 'Select and copy'; }
+  setTimeout(() => { b.textContent = label; }, 2000);
+  track('copied-the-claude-prompt');
+}));
+
+try { const last = JSON.parse(localStorage.getItem(STORE) || 'null'); if (last?.md) use(last.md, last.name + '.md'); } catch (e) {}
+</script>
 </body>
 </html>

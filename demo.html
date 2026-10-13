@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stagehand</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Inter:wght@400..600&display=swap">
+<link rel="stylesheet" href="stagehand.css">
+<style>
+  /* Anything special to this deck goes here. The kit lives in stagehand.css. */
+  .code { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 25px; line-height: 1.55; color: #D9D1C1; background: #070706; border: 1px solid #2A2620; padding: 36px 44px; white-space: pre; }
+  .code b { color: var(--sh-accent-strong); font-weight: 500; }
+  .code i { color: #7D7466; font-style: normal; }
+  .window { border: 1px solid #3A352D; background: #070706; aspect-ratio: 16 / 7; display: flex; align-items: center; justify-content: center; }
+  .keys { display: grid; grid-template-columns: 220px 1fr; gap: 22px 36px; align-items: baseline; }
+  .keys kbd { font-family: var(--sh-ui); font-size: 22px; letter-spacing: 0.08em; color: var(--sh-text); border: 1px solid #4A4338; border-radius: 6px; padding: 6px 14px; justify-self: start; }
+  .board { position: absolute; left: 1060px; top: 250px; width: 700px; height: 580px; }
+  .board .box { position: absolute; border: 2px solid #6B5E46; display: flex; align-items: center; justify-content: center; font-family: var(--sh-ui); font-size: 20px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sh-muted); }
+</style>
+</head>
+<body>
+
+<div class="deck" data-title="Stagehand" data-length="5">
+
+  <header class="title-card">
+    <p class="eyebrow">An experiment · thoughtbot</p>
+    <h1>Stagehand</h1>
+    <hr class="rule">
+    <p class="sub">One window for the room. One for you.</p>
+    <p class="credit">A presentation tool you can read in an afternoon</p>
+    <aside>This card stays up while people settle. Press Begin when you are ready.</aside>
+  </header>
+
+  <section data-title="Two windows">
+    <p class="eyebrow">How it works</p>
+    <h2>Two windows</h2>
+    <div class="columns" style="margin-top:24px">
+      <div class="card">
+        <div class="window"><span class="caption">The slides</span></div>
+        <h3>The one you share</h3>
+        <p>Just the slides, full screen. No controls, no notes, nothing to hide.</p>
+      </div>
+      <div class="card">
+        <div class="window"><span class="caption">Your script · next slide · timer</span></div>
+        <h3>The one you keep</h3>
+        <p>Your script, the next slide, a timer, and every control.</p>
+      </div>
+    </div>
+    <aside>Stagehand runs a talk across two windows. The one you share on a call or a projector shows only the slides. The one you keep has your script, a preview of what comes next, a timer, and every button.
+
+They stay in step on their own. Click Next in either one and both move.
+
+NOTE: This deck is the demo and the template at once. View the source to see how each slide is written.</aside>
+  </section>
+
+  <section data-title="A slide is a section">
+    <p class="eyebrow">Writing a deck</p>
+    <h2>A slide is a section</h2>
+    <pre class="code"><i>&lt;!-- everything inside the section is the slide --&gt;</i>
+&lt;<b>section</b> data-title="Two windows"&gt;
+  &lt;p class="eyebrow"&gt;How it works&lt;/p&gt;
+  &lt;h2&gt;Two windows&lt;/h2&gt;
+
+  <i>&lt;!-- and the aside is what you say --&gt;</i>
+  &lt;<b>aside</b>&gt;Stagehand runs a talk across two windows.&lt;/aside&gt;
+&lt;/section&gt;</pre>
+    <aside>Each slide is a section in one HTML file. Whatever is inside it is the slide, laid out on a 1920 by 1080 canvas, so it looks the same on a laptop and a projector.
+
+The aside is your script. It never shows on the shared screen. It shows, large, in your window.
+
+Any line in the aside that starts with a capital label and a colon, like NOTE: or SOURCES:, is kept out of your script. Use those for reminders to yourself.</aside>
+  </section>
+
+  <section data-title="Reveals">
+    <p class="eyebrow">One thing at a time</p>
+    <h2>Reveals</h2>
+    <ol class="points narrow" style="margin-top:20px">
+      <li class="reveal"><p>Add <code>class="reveal"</code> to anything on a slide.</p></li>
+      <li class="reveal"><p>Write <code>(click)</code> in your script where it should appear.</p></li>
+      <li class="reveal"><p>Next reveals them in order, then moves on.</p></li>
+    </ol>
+    <aside>Anything with the reveal class stays hidden until you click.
+
+(click) Mark it with class reveal.
+
+(click) Then write the word click in brackets in your script, where you want it to appear. In your window that turns into a numbered button, so you can see exactly where you are.
+
+(click) Next reveals them in order, and once they are all showing, it moves to the next slide.</aside>
+  </section>
+
+  <section data-title="Spotlight">
+    <p class="eyebrow">Pointing at things</p>
+    <h2 class="narrow">Spotlight</h2>
+    <p class="narrow" style="max-width:780px">Add <code>only</code> to a reveal and it shows for its own click, then steps aside for the next. Put a ring on it to circle part of a diagram as you talk.</p>
+    <div class="board">
+      <div class="box" style="left:0;top:0;width:320px;height:250px">Inbox</div>
+      <div class="box" style="left:380px;top:0;width:320px;height:250px">Review</div>
+      <div class="box" style="left:0;top:320px;width:700px;height:260px">Shipped</div>
+    </div>
+    <div class="ring reveal only" style="left:1020px;top:215px;width:400px;height:320px"></div>
+    <div class="ring reveal only" style="left:1400px;top:215px;width:400px;height:320px"></div>
+    <div class="ring reveal only" style="left:1000px;top:530px;width:820px;height:340px"></div>
+    <aside>Sometimes you want to point at one part of a picture at a time.
+
+(click) Work arrives in the inbox. (click) Someone reviews it. (click) And then it ships.
+
+Each ring is a reveal with the only class, so it shows for its own click and steps aside for the next.</aside>
+  </section>
+
+  <section data-title="Photos">
+    <div class="photo right"><img src="sample.svg" alt="An abstract amber light falling across a dark counter"></div>
+    <div class="over-photo" style="display:flex;flex-direction:column;gap:28px">
+      <p class="eyebrow">Layouts</p>
+      <h2>Photos drift</h2>
+      <div class="rows">
+        <span>Full bleed</span><span><code>class="photo"</code></span>
+        <span>Right side</span><span><code>class="photo right"</code></span>
+        <span>Darker</span><span><code>class="photo shade"</code></span>
+        <span>Hold still</span><span><code>class="photo still"</code></span>
+      </div>
+    </div>
+    <aside>Put an image in a photo box and it fills its space and drifts slowly, the way a documentary holds on a still.
+
+The labels and values here line up in two columns whatever their length. That is the rows class.</aside>
+  </section>
+
+  <section data-title="Numbers">
+    <p class="eyebrow">Making a point</p>
+    <h2>One number at a time</h2>
+    <div class="columns" style="margin-top:40px;max-width:1300px">
+      <div class="stat"><b>48%</b><p>of people with a regular spot talk to someone new at least monthly</p></div>
+      <div class="stat reveal"><b style="color:var(--sh-muted)">28%</b><p>of people without one</p></div>
+    </div>
+    <p class="caption" style="margin-top:40px">Sample figures, from the deck Stagehand was built for</p>
+    <aside>A stat lands harder when the comparison arrives a beat later.
+
+(click) The second number is a reveal, so you say the first, pause, and then show the second.</aside>
+  </section>
+
+  <section data-title="Sound">
+    <p class="eyebrow">Optional</p>
+    <h2>Sound and narration</h2>
+    <div class="rows" style="margin-top:24px;grid-template-columns:420px 1fr">
+      <span>A bed under a slide</span><span><code>data-sound="room.mp3"</code></span>
+      <span>A voice over a slide</span><span><code>data-voice="intro.mp3"</code></span>
+      <span>A voice over the title</span><span>the same, on the title card</span>
+    </div>
+    <p class="narrow" style="margin-top:24px">Beds crossfade between slides and dip while a voice plays. Volume and mute live in your window.</p>
+    <aside>Sound is optional, and this demo has none.
+
+Put data-sound on a slide and a recording loops quietly under it. Slides that share a recording carry it through without a seam.
+
+Put data-voice on a slide, or on the title card, and a recording plays once when you arrive, with the room tone dipping underneath. A recorded narrator over the title card makes a strong cold open.</aside>
+  </section>
+
+  <section data-title="Presenting">
+    <p class="eyebrow">On the day</p>
+    <h2>Presenting</h2>
+    <div class="keys" style="margin-top:28px">
+      <kbd>Click</kbd><p>The shared window once: sound on, your window opens</p>
+      <kbd>Click again</kbd><p>Full screen</p>
+      <kbd>→ or a clicker</kbd><p>Next, in either window</p>
+      <kbd>F · M · P</kbd><p>Full screen, mute, open your window</p>
+    </div>
+    <aside>Open the deck and click it once. That turns the sound on and opens your window. Click it once more to go full screen, then share it.
+
+From then on, drive everything from your window, or from a clicker. The dots along the bottom jump to any slide. Edit lets you rewrite your script on the spot, and keeps your changes in that browser.
+
+If you refresh by accident, it comes back to the same slide.</aside>
+  </section>
+
+  <section data-title="Make your own">
+    <p class="eyebrow">Your turn</p>
+    <h2>Make your own</h2>
+    <ol class="points narrow" style="margin-top:20px">
+      <li><p>Drop or paste your Markdown on the Stagehand start page.</p></li>
+      <li><p>Or hand it to Claude with the Stagehand skill.</p></li>
+      <li><p>Or copy the repository and write the HTML yourself.</p></li>
+    </ol>
+    <aside>The quickest way to make your own is to write it in Markdown and drop or paste it on the start page. Each slide picks its own layout, and you choose Classic, Paper or Signal.
+
+For more polish, hand the same file to Claude with the Stagehand skill. It tightens the words and moves the rest into your script.
+
+And if you want full control, copy the repository and start from blank.html or one of the templates.
+
+And tell us what broke, or what you wished it did.</aside>
+  </section>
+
+</div>
+
+<script type="module" src="stagehand.js"></script>
+</body>
+</html>

@@ -6,17 +6,17 @@ shows only the slides. The one you keep has your script, the next slide, a
 timer and every control. A deck is one HTML file. There is no build step and
 nothing to install.
 
-Open it at https://rantbot.github.io/stagehand/make.html. It is one of
+Open it at https://rantbot.github.io/stagehand/. It is one of
 thoughtbot's experiments, kept on Ran's account.
 
 This repository is the whole tool:
 
 ```
-make.html         drop a Markdown file here to preview, theme, present or save it
+index.html        the start page: drop or paste Markdown, pick a design, present or save it
 md.html           shows a Markdown file as a deck, md.html?src=talk.md
 markdown.js       turns Markdown into slides and picks each slide's layout
 example.md        a Markdown deck that uses every layout
-index.html        the demo deck, which is also a full example of every feature
+demo.html         the demo deck, which is also a full example of every feature
 blank.html        a short starting deck to copy
 template-paper.html   a light, editorial look for retros and case studies
 template-signal.html  a bold, bright look for updates and pitches
@@ -31,7 +31,7 @@ skill/            the Claude skill that writes decks in this format
 
 ## From Markdown
 
-The quickest way in. Open `make.html`, drop in a Markdown file, pick a look and
+The quickest way in. Open the start page, drop in or paste a Markdown file, pick a look and
 press Present. Save as HTML gives you a deck file that loads Stagehand from
 this site, so it works wherever you host it.
 
@@ -74,7 +74,7 @@ ask for one.
 
 ## Making a deck by hand
 
-Copy this folder, then edit `blank.html`, `index.html`, or one of the
+Copy this folder, then edit `blank.html`, `demo.html`, or one of the
 templates. Open it through a web
 server rather than by double-clicking, since sound files and modules will not
 load from a `file://` address. GitHub Pages works, and so does
@@ -176,7 +176,7 @@ Three looks come with it. Each is a whole deck you can copy and rewrite.
 
 | File | Look | Good for |
 | --- | --- | --- |
-| `index.html` | Dark, warm, documentary | Story talks, demos |
+| `demo.html` | Dark, warm, documentary | Story talks, demos |
 | `template-paper.html` | Light paper, serif, one red accent | Retros, case studies, research |
 | `template-signal.html` | Dark with flood colored section slides | Updates, pitches, kickoffs |
 
