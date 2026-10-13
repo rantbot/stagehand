@@ -183,6 +183,7 @@
       <a class="opt" href="#templates">Templates</a>
       <a class="opt" href="#claude">With Claude</a>
       <a class="opt" href="#write">How to write it</a>
+      <a class="opt" href="#contribute">Contribute</a>
       <a class="btn" href="demo.html" data-demo>Watch the demo</a>
     </nav>
   </div>
@@ -199,7 +200,7 @@
         <a class="btn primary" href="#start">Start with your Markdown</a>
         <a class="btn" href="demo.html" data-demo>Watch the demo</a>
       </div>
-      <p class="fine">Free, in your browser, nothing to install. Your file never leaves this computer.</p>
+      <p class="fine">Free and <a href="#contribute">open source</a>. It runs in your browser with nothing to install, and your file never leaves this computer.</p>
     </div>
 
     <div class="windows" aria-hidden="true">
@@ -345,7 +346,7 @@
         </div>
       </article>
     </div>
-    <p class="more">Want a look of your own, like a client's brand? <a href="#claude">Ask Claude to design one</a>, or set a few color and type variables yourself, as the <a href="https://github.com/rantbot/stagehand#your-own-look">guide</a> shows.</p>
+    <p class="more">Want a look of your own, like a client's brand? <a href="#claude">Ask Claude to design one</a>, or set a few color and type variables yourself, as the <a href="https://github.com/rantbot/stagehand#your-own-look">guide</a> shows. Made one you like? <a href="#contribute">Add it for everyone.</a></p>
   </div>
 </section>
 
@@ -409,14 +410,43 @@ One line.</pre><p>Two to four small headings, each with something under it, beco
     </div>
   </div>
 </section>
+<section class="band" id="contribute">
+  <div class="wrap">
+    <p class="eyebrow">Open source</p>
+    <h2>Help make Stagehand better</h2>
+    <p class="intro">Stagehand is open source under the MIT license. Everything that makes it work is on GitHub, and it improves fastest when the people giving talks with it change it. You don't need to be a developer to help.</p>
+    <div class="ways">
+      <a class="way" href="https://github.com/rantbot/stagehand/issues/new">
+        <h3>Tell us what happened</h3>
+        <p>Something broke, or you reached for something that wasn't there. A sentence and a screenshot is plenty.</p>
+        <span class="go">Open an issue →</span>
+      </a>
+      <a class="way" href="https://github.com/rantbot/stagehand/tree/main/themes">
+        <h3>Add a design</h3>
+        <p>A theme is one small stylesheet with a few color and type variables. Make one for a client, a team or a mood, and share it.</p>
+        <span class="go">See the themes →</span>
+      </a>
+      <a class="way" href="https://github.com/rantbot/stagehand/blob/main/CONTRIBUTING.md">
+        <h3>Change how it works</h3>
+        <p>Teach the Markdown a new layout, sharpen the Claude skill or fix a bug. No build step, so Claude can help you do it.</p>
+        <span class="go">How to contribute →</span>
+      </a>
+    </div>
+    <div class="row" style="margin-top:28px">
+      <a class="btn primary" href="https://github.com/rantbot/stagehand" data-github>See it on GitHub</a>
+      <a class="btn" href="https://github.com/rantbot/stagehand/blob/main/CONTRIBUTING.md">Read the contributing guide</a>
+    </div>
+  </div>
+</section>
 </main>
 
 <footer>
   <div class="wrap row">
-    <span>Stagehand is one of thoughtbot's experiments, made by Ran Craycraft.</span>
+    <span>Stagehand is one of thoughtbot's experiments, made by Ran Craycraft. Open source under the <a href="https://github.com/rantbot/stagehand/blob/main/LICENSE">MIT license</a>.</span>
     <nav aria-label="More">
       <a href="demo.html" data-demo>Demo</a>
       <a href="https://github.com/rantbot/stagehand#readme">Guide</a>
+      <a href="https://github.com/rantbot/stagehand/blob/main/CONTRIBUTING.md">Contribute</a>
       <a href="https://github.com/rantbot/stagehand">GitHub</a>
     </nav>
   </div>
@@ -499,6 +529,7 @@ document.querySelectorAll('[data-use]').forEach(b => b.addEventListener('click',
   track('picked-a-template');
 }));
 document.querySelectorAll('[data-demo]').forEach(a => a.addEventListener('click', () => track('opened-the-demo')));
+document.querySelectorAll('#contribute a').forEach(a => a.addEventListener('click', () => track('looked-at-contributing', { once: true })));
 
 /* Template pictures load once they are near the screen */
 const shots = new IntersectionObserver(entries => entries.forEach(e => {

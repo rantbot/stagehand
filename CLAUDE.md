@@ -51,6 +51,9 @@ repository and is not part of this experiment.
   and Markdown, pasting, our designs and Claude as equal ways in. `make.html`
   redirects there, and the demo moved from `index.html` to `demo.html`.
   `md.html?view=cover&n=` draws one slide for the page's pictures.
+- **Open source under MIT, October 2026.** Ran wanted it clear that anyone can
+  contribute. `LICENSE` and `CONTRIBUTING.md` are at the root, and the start page
+  has a Contribute section and says so under the hero.
 - **Dropped files stay in the browser.** The start page keeps the Markdown in
   localStorage under a hash and opens md.html?id=… so both windows can read it.
   Nothing is uploaded.

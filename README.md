@@ -231,6 +231,12 @@ Hand Claude your outline and this README, and ask for a Stagehand deck. The
 format above is all it needs. Ask it to keep the words on the slides short and
 put the rest in the script.
 
+## Contributing
+
+Stagehand is open source under the [MIT license](LICENSE). Bug reports, ideas,
+new designs and new layouts are all welcome. [CONTRIBUTING.md](CONTRIBUTING.md)
+says how to try a change and send it.
+
 ## What it records
 
 `experiments-web.js` counts a few named actions, like opening a deck or using a
