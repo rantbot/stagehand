@@ -68,6 +68,18 @@ repository and is not part of this experiment.
   `npm test` (node:test, no installs) and a GitHub check run on every push.
   CONTRIBUTING.md has the tour. Behavior did not change, checked by comparing
   a two window run and the example deck's HTML before and after.
+- **Ideas from other slide tools, October 2026.** Ran looked at open-slide,
+  Slidev and reveal.js and asked for three things, not PowerPoint export.
+  Code steps (```` ```js {1|3-4} ````) are hidden `.code-step.reveal` markers
+  inside the `pre`, so they use the ordinary click budget, and
+  `highlightCode` in stagehand.js lights the lines of the latest one showing.
+  Carrying over (`carryOver`) matches headings, labels, section numbers and
+  pictures between the old and new slide, swaps the slides at once and moves
+  the matches with the Web Animations API, so no style attribute is written.
+  Carried elements keep `.sh-carried` until their slide is out of sight, or
+  their rise animation restarts. Notes for Claude live on the start page: md.js
+  posts `stagehand-pick` when a preview slide is clicked, and start.js bundles
+  the notes with the whole deck in one fenced block.
 - **Dropped files stay in the browser.** The start page keeps the Markdown in
   localStorage under a hash and opens md.html?id=… so both windows can read it.
   Nothing is uploaded.

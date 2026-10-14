@@ -154,13 +154,14 @@ function blocks(src) {
       continue;
     }
     let m;
-    if ((m = l.match(/^\s*(```|~~~)\s*([\w-]*)/))) {
+    // A fence can end with line steps, like ```js {1|3-4|6}.
+    if ((m = l.match(/^\s*(```|~~~)\s*([\w-]*)\s*(?:\{([^}]*)\})?/))) {
       const end = m[1];
       const code = [];
       i++;
       while (i < lines.length && !lines[i].trim().startsWith(end)) code.push(lines[i++]);
       i++;
-      out.push({ type: 'code', lang: m[2], text: code.join('\n') });
+      out.push({ type: 'code', lang: m[2], steps: codeSteps(m[3]), text: code.join('\n') });
       continue;
     }
     if ((m = l.match(/^(#{1,6})\s+(.*?)\s*#*\s*$/))) {
@@ -220,6 +221,38 @@ function blocks(src) {
   return out;
 }
 
+/* ---------- code steps ---------- */
+
+// Reads the steps after a code fence, "1|3-4|6", into groups of line numbers:
+// [[1], [3, 4], [6]]. Each (click) highlights the next group and dims the rest.
+export function codeSteps(spec) {
+  if (!spec || !spec.trim()) return [];
+  return spec.split('|').map(group =>
+    group.split(',').flatMap(part => {
+      const [from, to = from] = part.trim().split('-').map(Number);
+      if (!Number.isInteger(from) || !Number.isInteger(to) || to < from) return [];
+      return Array.from({ length: to - from + 1 }, (_, k) => from + k);
+    }),
+  );
+}
+
+// A code panel. With steps, each line is its own span, and each step that has
+// a (click) left becomes a hidden .reveal marker naming its lines. stagehand.js
+// highlights the lines of the latest marker that is showing.
+function codeHTML(b, takeClick) {
+  if (!b.steps.length) return `<pre class="code">${escapeHtml(b.text)}</pre>`;
+  const lines = b.text
+    .split('\n')
+    .map((line, k) => `<span class="ln" data-n="${k + 1}">${escapeHtml(line)}</span>`)
+    .join('\n');
+  const markers = b.steps
+    .map(group =>
+      takeClick() ? `<i class="code-step reveal" data-lines="${group.join(' ')}"></i>` : '',
+    )
+    .join('');
+  return `<pre class="code stepped">${markers}${lines}</pre>`;
+}
+
 /* ---------- layouts ---------- */
 
 // A list item that leads with a number, like "**68%** finish setup" or
@@ -245,7 +278,7 @@ function render(b, reveal) {
     case 'img':
       return `<img class="figure" src="${escapeHtml(b.src)}" alt="${escapeHtml(b.alt)}">`;
     case 'code':
-      return `<pre class="code">${escapeHtml(b.text)}</pre>`;
+      return codeHTML(b, () => r() !== '');
     case 'quote':
       return `<p class="quote">${inline(b.lines.join(' '))}</p>`;
     case 'table':
@@ -529,6 +562,7 @@ export function markdownToDeck(text) {
   ];
   if (meta.sound) attrs.push(`data-sound="${escapeHtml(meta.sound)}"`);
   if ((meta.numbers || '').toLowerCase() === 'off') attrs.push('data-numbers="off"');
+  if ((meta.motion || '').toLowerCase() === 'off') attrs.push('data-motion="off"');
   if (
     (meta.grain || '').toLowerCase() === 'off' ||
     ((meta.theme || '').toLowerCase() !== 'classic' && meta.grain !== 'on')
@@ -659,6 +693,18 @@ export function checkMarkdown(text) {
           'warn',
           'This heading is long. Try eight words or fewer and move the rest to your notes.',
         );
+      }
+      if (b.type === 'code' && b.steps.length) {
+        const count = b.text.split('\n').length;
+        const missing = b.steps.flat().filter(n => n > count);
+        if (missing.length) {
+          add(
+            slide,
+            lineOf(/^\s*(```|~~~).*\{/),
+            'warn',
+            `The steps name line ${missing[0]}, but this code has ${count} ${count === 1 ? 'line' : 'lines'}.`,
+          );
+        }
       }
       if (b.type === 'list' && b.items.length > LIMITS.listItems) {
         add(

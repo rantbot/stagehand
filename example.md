@@ -98,13 +98,17 @@ Notes: Tables work too.
 
 ---
 
-## The one line that mattered
+## The check that mattered
 
-```js
-if (account.connected && !project) showNextStep();
+```js {2|3-4}
+function nextStep(account) {
+  if (!account.connected) return 'connect';
+  if (!account.project) return 'first-project';
+  return 'done';
+}
 ```
 
-Notes: So does code.
+Notes: Code works too, and steps after the language light up lines one click at a time. (click) First, are they connected? (click) Then, have they made something?
 
 ---
 

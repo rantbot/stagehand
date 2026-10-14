@@ -45,6 +45,8 @@ const STAGE_HEIGHT = 1080;
 const CROSSFADE_MS = 1000; // a little longer than the 0.9s crossfade in stagehand.css
 const CURSOR_IDLE_MS = 2600; // hides the pointer on the shared window after this
 const TIMER_TICK_MS = 500;
+const CARRY_MS = 800; // how long a heading or picture takes to move to its place on the next slide
+const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const deck = document.querySelector('.deck');
 const slides = [...deck.querySelectorAll(':scope > section')];
@@ -259,13 +261,24 @@ fit();
 let leaveT = null;
 function render(arriving = true) {
   const was = slides.find(x => x.classList.contains('active'));
-  if (was && was !== slides[i]) {
+  const changing = was && was !== slides[i];
+  // Something carried in keeps .sh-carried while its slide is up, or its rise
+  // animation would start over. Slides that are out of sight can rise again.
+  slides.forEach(slide => {
+    if (slide !== was && slide !== slides[i]) {
+      slide.querySelectorAll('.sh-carried').forEach(el => el.classList.remove('sh-carried'));
+    }
+  });
+  // Headings and pictures on both slides move to their new place instead of fading.
+  const carry = changing ? carryOver(was, slides[i]) : null;
+  if (changing && !carry) {
     slides.forEach(x => x.classList.remove('leaving'));
     was.classList.add('leaving');
     clearTimeout(leaveT);
     leaveT = setTimeout(() => was.classList.remove('leaving'), CROSSFADE_MS);
   }
   slides.forEach((el, k) => el.classList.toggle('active', k === i));
+  carry?.finish();
   const el = slides[i];
   showSteps(el, step);
   if (started && !presenter) {
@@ -307,6 +320,94 @@ function showSteps(el, s) {
     x.classList.toggle('on', k < s);
     x.classList.toggle('past', k < s - 1);
   });
+  highlightCode(el);
+}
+
+// Code with line steps (see codeHTML in markdown.js) highlights the lines named
+// by its latest step that is showing, and dims the rest. Before the first, all
+// lines show as usual.
+function highlightCode(el) {
+  for (const code of el.querySelectorAll('pre.stepped')) {
+    const current = [...code.querySelectorAll('.code-step.on')].pop();
+    const lit = new Set(current ? current.dataset.lines.split(' ') : []);
+    code.classList.toggle('stepping', Boolean(current));
+    code
+      .querySelectorAll('.ln')
+      .forEach(line => line.classList.toggle('lit', lit.has(line.dataset.n)));
+  }
+}
+
+/* ---------- carrying things between slides ---------- */
+
+// The same heading, label, section number or picture on two slides in a row
+// glides from its place on the first to its place on the second, and the rest
+// of the new slide rises in around it. A deck can turn this off with
+// data-motion="off", or `motion: off` in Markdown.
+const CARRIED = 'h1, h2, h3, .eyebrow, .big-num, .photo, img.figure, [data-id]';
+
+function carryKey(el) {
+  if (el.dataset.id) return `id:${el.dataset.id}`;
+  const img = el.matches('img') ? el : el.querySelector(':scope > img');
+  if (img) return `img:${img.getAttribute('src')}`;
+  return `${el.tagName}:${el.textContent.replace(/\s+/g, ' ').trim()}`;
+}
+
+function carryable(slide) {
+  const found = new Map();
+  for (const el of slide.querySelectorAll(CARRIED)) {
+    if (el.closest('aside, .sh-num') || (el.closest('.reveal') && !el.closest('.reveal.on')))
+      continue;
+    if (el.parentElement.closest(CARRIED)) continue; // the outermost match moves, with what is inside it
+    const key = carryKey(el);
+    if (found.has(key))
+      found.set(key, null); // twice on one slide is too ambiguous to move
+    else found.set(key, el);
+  }
+  return found;
+}
+
+// Returns null when nothing is shared, or when motion is off. Otherwise it
+// notes where the shared things are now, and returns finish(), which is called
+// once the new slide is showing and moves them from there.
+function carryOver(from, to) {
+  if (REDUCED_MOTION || deck.dataset.motion === 'off') return null;
+  const before = carryable(from);
+  const pairs = [...carryable(to)]
+    .filter(([key, el]) => el && before.get(key))
+    .map(([key, el]) => [before.get(key), el]);
+  if (!pairs.length) return null;
+
+  const start = pairs.map(([old]) => old.getBoundingClientRect());
+  for (const slide of [from, to]) slide.classList.add('sh-instant');
+  return {
+    finish() {
+      const scale = stage.getBoundingClientRect().width / STAGE_WIDTH;
+      pairs.forEach(([, el], k) => {
+        const end = el.getBoundingClientRect();
+        if (!end.width || !start[k].width) return;
+        const dx = (start[k].left - end.left) / scale;
+        const dy = (start[k].top - end.top) / scale;
+        const size = start[k].width / end.width;
+        el.classList.add('sh-carried');
+        // The Web Animations API, so nothing is written to the element's style attribute.
+        el.animate(
+          [
+            {
+              transformOrigin: 'top left',
+              transform: `translate(${dx}px, ${dy}px) scale(${size})`,
+            },
+            { transformOrigin: 'top left', transform: 'none' },
+          ],
+          { duration: CARRY_MS, easing: 'cubic-bezier(.2,.7,.2,1)' },
+        );
+      });
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          for (const slide of [from, to]) slide.classList.remove('sh-instant');
+        }),
+      );
+    },
+  };
 }
 
 /* ---------- presenter window ---------- */

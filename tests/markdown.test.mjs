@@ -4,7 +4,14 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { markdownToDeck, checkMarkdown, brandStyle, withFrontMatter, inline } from '../markdown.js';
+import {
+  markdownToDeck,
+  checkMarkdown,
+  brandStyle,
+  withFrontMatter,
+  inline,
+  codeSteps,
+} from '../markdown.js';
 
 const example = readFileSync(new URL('../example.md', import.meta.url), 'utf8');
 
@@ -152,4 +159,31 @@ test('crowded slides and long headings are flagged', () => {
   const { issues } = checkMarkdown(`# T\n\n---\n\n## ${heading}\n\n${words}`);
   assert.ok(issues.some(issue => issue.kind === 'words'));
   assert.ok(issues.some(issue => issue.message.startsWith('This heading is long')));
+});
+
+test('code steps become hidden reveals that name their lines', () => {
+  const html = deckOf('## Code\n\n```js {1|2-3}\na()\nb()\nc()\n```\n\nNotes: (click) (click)');
+  assert.match(html, /<pre class="code stepped">/);
+  assert.match(html, /<i class="code-step reveal" data-lines="1"><\/i>/);
+  assert.match(html, /<i class="code-step reveal" data-lines="2 3"><\/i>/);
+  assert.match(html, /<span class="ln" data-n="3">c\(\)<\/span>/);
+});
+
+test('code steps only take the clicks the notes have', () => {
+  const html = deckOf('## Code\n\n```js {1|2|3}\na()\nb()\nc()\n```\n\nNotes: (click)');
+  assert.equal(html.match(/code-step/g).length, 1);
+});
+
+test('codeSteps reads single lines, ranges and lists', () => {
+  assert.deepEqual(codeSteps('1|3-4|6,8'), [[1], [3, 4], [6, 8]]);
+  assert.deepEqual(codeSteps(''), []);
+});
+
+test('code steps that name a missing line are flagged', () => {
+  const { issues } = checkMarkdown('# T\n\n---\n\n## Code\n\n```js {1|9}\na()\n```');
+  assert.match(issues[0].message, /The steps name line 9, but this code has 1 line/);
+});
+
+test('motion: off reaches the deck', () => {
+  assert.match(markdownToDeck('---\nmotion: off\n---\n\n## Hi').html, /data-motion="off"/);
 });

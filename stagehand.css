@@ -149,6 +149,12 @@ body { background: var(--sh-ink); color: var(--sh-text); font-family: var(--sh-u
 /* A ring that circles part of a slide. Pair it with .reveal.only so it moves as you click. */
 .ring { position: absolute !important; border: 3px solid var(--sh-accent-strong); border-radius: 50%; pointer-events: none; box-shadow: 0 0 0 4000px var(--sh-dim); }
 
+/* Code with line steps: each click lights its lines and dims the rest. */
+.code .code-step { display: none; }
+.code.stepped .ln { transition: opacity 0.4s ease; }
+.code.stepping .ln { opacity: 0.3; }
+.code.stepping .ln.lit { opacity: 1; }
+
 /* Reveals: hidden until you click. .only shows during its own click and hides again after. */
 .reveal { opacity: 0; transition: opacity 0.6s ease; }
 .reveal.on { opacity: 1; }
@@ -173,6 +179,11 @@ body { background: var(--sh-ink); color: var(--sh-text); font-family: var(--sh-u
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   animation: sh-grain 0.9s steps(6) infinite; }
 @keyframes sh-grain { 0% { transform: translate(0, 0); } 25% { transform: translate(-22px, 14px); } 50% { transform: translate(18px, -26px); } 75% { transform: translate(-12px, 30px); } 100% { transform: translate(0, 0); } }
+/* Carrying things over. The two slides swap at once, and anything on both moves
+   from its old place to its new one, without rising in like the rest. */
+.deck > section.sh-instant { transition: none !important; }
+.sh-carried { animation: none !important; }
+
 @media (prefers-reduced-motion: reduce) {
   .deck > section, .deck > section.active { transform: none; }
   .photo > img, .rise, .sh-grain, .sh-gate * { animation: none !important; }

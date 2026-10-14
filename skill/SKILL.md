@@ -83,6 +83,14 @@ Notes: What the speaker says while the title card is up.
 Notes: Here is the plan. (click) First... (click) Then... (click) And last...
 ```
 
+To walk through code, put steps after the language, like ` ```ruby {1|2-3|5} `.
+Each `(click)` in the notes lights up the next group of lines. Use it when the
+talk explains code a piece at a time.
+
+People may paste a list of notes from the start page, each naming a slide and
+line, with their deck below. Make exactly those changes, keep the rest as it
+is, and hand back the whole Markdown file.
+
 For a brand or a look of their own, add any of `accent`, `background` and
 `text` (hex colors like `#FF5A36`), `font` and `body-font` (names from Google
 Fonts) to the front matter. They work on top of any theme, so this is the way to
@@ -128,7 +136,7 @@ The start page checks every deck and points to the slide and line, so anything
 you leave wrong shows up as a warning for them. Before you finish, go through
 the same list: every code block closed, every setting valid, no slide over about
 70 words, no list over six items, no heading over twelve words, and no more
-`(click)` cues than things to reveal. If you can run code, `checkMarkdown` in
+`(click)` cues than things to reveal, and code steps only name lines the code has. If you can run code, `checkMarkdown` in
 https://rantbot.github.io/stagehand/markdown.js returns the same list.
 
 Pictures are paths relative to where the deck is hosted. Ask for the files if

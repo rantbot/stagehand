@@ -47,8 +47,12 @@ if (source.text == null) {
     await import('./stagehand.js');
   } else {
     const wrap = layOutThumbnails(deck, view);
-    if (view === 'print') await printEverySlide(wrap, meta);
-    else reportToStartPage(wrap, meta, fit);
+    if (view === 'print') {
+      await printEverySlide(wrap, meta);
+    } else {
+      reportToStartPage(wrap, meta, fit);
+      if (view === 'grid') letStartPagePickSlides(wrap);
+    }
   }
 }
 
@@ -170,6 +174,35 @@ function reportToStartPage(wrap, meta, fit) {
     );
   report();
   picturesSettled(wrap).then(report);
+}
+
+// Clicking a slide in the preview tells the start page, which opens a note for
+// Claude about it. The start page sends back which slides have notes, to mark them.
+// A slide's index is its data-i, or -1 for the title card.
+function letStartPagePickSlides(wrap) {
+  const indexOf = thumb => Number(thumb.querySelector('[data-i]')?.dataset.i ?? -1);
+  wrap.addEventListener('click', event => {
+    const thumb = event.target.closest('.sh-thumb');
+    if (!thumb) return;
+    wrap.querySelectorAll('.picked').forEach(t => t.classList.remove('picked'));
+    thumb.classList.add('picked');
+    const heading = ['h1', 'h2', '.quote', 'p'].map(sel => thumb.querySelector(sel)).find(Boolean);
+    parent.postMessage(
+      {
+        type: 'stagehand-pick',
+        i: indexOf(thumb),
+        title: heading ? heading.textContent.replace(/\s+/g, ' ').trim().slice(0, 80) : '',
+      },
+      '*',
+    );
+  });
+  addEventListener('message', event => {
+    if (event.source !== parent || event.data?.type !== 'stagehand-noted') return;
+    const noted = new Set(event.data.indices);
+    wrap
+      .querySelectorAll('.sh-thumb')
+      .forEach(t => t.classList.toggle('noted', noted.has(indexOf(t))));
+  });
 }
 
 /* ---------- small helpers ---------- */

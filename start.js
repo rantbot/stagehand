@@ -15,6 +15,7 @@
  *   adding Markdown        the file, drag and drop, pasting and the example
  *   the preview            md.html in an iframe, refreshed as you type
  *   checks                 problems from checkMarkdown plus what the preview found
+ *   notes for Claude       click a slide in the preview, write what should change
  *   your own colors        the color and font fields, laid over the front matter
  *   designs                the template cards further down the page
  *   present and save       Present, Save as PDF and Save as HTML
@@ -27,6 +28,7 @@ import { track } from './experiments-web.js';
 /* ---------- state and helpers ---------- */
 
 const LAST_DECK_KEY = 'stagehand:make:last'; // the last Markdown, restored on the next visit
+const NOTES_KEY = 'stagehand:make:notes'; // notes for Claude on that Markdown
 const PREVIEW_DELAY_MS = 250; // waits for a pause in typing before redrawing the preview
 const PREVIEW_MIN_HEIGHT = 480;
 
@@ -41,6 +43,7 @@ let fileName = 'deck'; // used to name a saved HTML file
 const brand = {}; // their own colors and fonts, by front matter key, from the fields
 let fileChecks = { issues: [], lines: [], firstIsCard: false }; // from checkMarkdown
 let previewReport = null; // what md.html found laying the slides out, or null while it loads
+let notes = []; // notes for Claude: { slide, line, title, text }
 
 // The Markdown that gets presented: theirs, with their own colors and fonts laid
 // over its front matter. What they wrote is never changed.
@@ -98,6 +101,7 @@ function useMarkdown(text, name) {
   $('previewTitle').textContent = meta.title;
   $('previewCount').textContent = `${meta.slides} ${meta.slides === 1 ? 'slide' : 'slides'}`;
 
+  $('notes').hidden = false;
   fillColorFields();
   fileChecks = checkMarkdown(markdown);
   drawChecks();
@@ -116,6 +120,7 @@ $('tabPaste').addEventListener('click', () => showTab(true));
 
 async function readFile(file) {
   if (!file) return;
+  setNotes([]);
   useMarkdown(await file.text(), file.name);
   showTab(false);
   track('made-a-deck-from-markdown');
@@ -162,6 +167,7 @@ textArea.addEventListener('input', () => {
 
 $('example').addEventListener('click', async () => {
   const response = await fetch('example.md');
+  setNotes([]);
   useMarkdown(await response.text(), 'example.md');
 });
 
@@ -181,6 +187,7 @@ function schedulePreview() {
 
 function showEmptyPreview() {
   previewFrame.hidden = true;
+  $('notes').hidden = true;
   $('empty').hidden = false;
   $('checks').hidden = true;
   $('previewTitle').textContent = 'Preview';
@@ -190,24 +197,28 @@ function showEmptyPreview() {
 // md.html reports its height and what it found, once laid out and again once
 // every picture has loaded or failed. See reportToStartPage in md.js.
 addEventListener('message', event => {
-  if (event.data?.type !== 'stagehand-grid' || event.source !== previewFrame.contentWindow) return;
+  if (event.source !== previewFrame.contentWindow) return;
+  if (event.data?.type === 'stagehand-pick') return startNote(event.data);
+  if (event.data?.type !== 'stagehand-grid') return;
   previewFrame.style.height = `${Math.max(PREVIEW_MIN_HEIGHT, event.data.height)}px`;
   previewReport = event.data;
   drawChecks();
+  markNotedSlides();
 });
 
 /* ---------- checks ---------- */
+
+// The preview counts slides from 0 and leaves out the title card. Problems and
+// notes count from 1 in file order, with the title card first when the file's
+// first slide is it.
+const slideNumber = i => i + 1 + (fileChecks.firstIsCard ? 1 : 0);
+const slideLine = i => fileChecks.lines[slideNumber(i) - 1] || 0;
 
 // Every problem worth showing: what checkMarkdown read in the file, plus what
 // the preview found when it laid the slides out, sorted by line.
 function collectProblems() {
   let problems = [...fileChecks.issues];
   if (!previewReport) return problems;
-
-  // The preview counts slides from 0 and leaves out the title card. Problems
-  // count from 1 in file order, with the title card first when there is one.
-  const slideNumber = i => i + 1 + (fileChecks.firstIsCard ? 1 : 0);
-  const slideLine = i => fileChecks.lines[slideNumber(i) - 1] || 0;
 
   previewReport.fit.forEach((fit, i) => {
     if (fit === 'over') {
@@ -296,6 +307,102 @@ function jumpToLine(lineNumber) {
   const lineHeight = parseFloat(getComputedStyle(textArea).lineHeight) || 20;
   textArea.scrollTop = Math.max(0, index * lineHeight - textArea.clientHeight / 3);
   if (innerWidth < 900) textArea.scrollIntoView({ block: 'center' });
+}
+
+/* ---------- notes for Claude ---------- */
+
+// Click a slide in the preview, say what should change, and repeat. Copy notes
+// for Claude bundles them with the whole deck, ready to paste into Claude
+// with the Stagehand skill. The deck is in the message, so nothing needs attaching.
+let noteTarget = null; // the slide a note is being written for
+
+function startNote({ i, title }) {
+  const isCard = i < 0;
+  noteTarget = {
+    i,
+    slide: isCard ? (fileChecks.firstIsCard ? 1 : 0) : slideNumber(i),
+    line: isCard ? fileChecks.lines[0] || 1 : slideLine(i),
+    title,
+  };
+  $('noteFor').textContent = noteLabel(noteTarget);
+  $('noteForm').hidden = false;
+  $('noteText').value = '';
+  $('noteText').focus();
+}
+
+const noteLabel = note =>
+  `${note.slide ? `slide ${note.slide}` : 'the title card'}${note.title ? `, "${note.title}"` : ''}`;
+
+$('noteForm').addEventListener('submit', event => {
+  event.preventDefault();
+  const text = $('noteText').value.trim();
+  if (!text || !noteTarget) return;
+  setNotes([...notes, { ...noteTarget, text }]);
+  $('noteForm').hidden = true;
+  track('left-a-note-for-claude', { once: true });
+});
+$('cancelNote').addEventListener('click', () => ($('noteForm').hidden = true));
+$('clearNotes').addEventListener('click', () => setNotes([]));
+$('noteList').addEventListener('click', event => {
+  const button = event.target.closest('[data-remove]');
+  if (button) setNotes(notes.filter((_, k) => k !== Number(button.dataset.remove)));
+});
+$('copyNotes').addEventListener('click', () => {
+  copyFrom($('copyNotes'), notesForClaude());
+  track('copied-notes-for-claude');
+});
+
+function setNotes(next) {
+  notes = next;
+  try {
+    localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+  } catch {
+    // Notes still work for this visit.
+  }
+  $('noteList').innerHTML = notes
+    .map(
+      (note, k) => `
+      <li>
+        <b>${note.slide ? `Slide ${note.slide}` : 'Title card'}</b>
+        <span>${escapeHtml(note.text)}</span>
+        <button type="button" data-remove="${k}" aria-label="Remove this note">×</button>
+      </li>`,
+    )
+    .join('');
+  $('copyNotes').hidden = $('clearNotes').hidden = !notes.length;
+  $('notesHint').textContent = notes.length
+    ? `${notes.length} ${notes.length === 1 ? 'note' : 'notes'} for Claude. Click another slide to add more.`
+    : 'Want Claude to change something? Click a slide to leave it a note.';
+  markNotedSlides();
+}
+
+// Tells the preview which slides have notes, so it can mark them.
+function markNotedSlides() {
+  previewFrame.contentWindow?.postMessage(
+    { type: 'stagehand-noted', indices: notes.map(note => note.i) },
+    '*',
+  );
+}
+
+// The message to paste into Claude: the notes, then the whole deck.
+function notesForClaude() {
+  const deck = deckMarkdown();
+  const longestRun = Math.max(2, ...(deck.match(/`+/g) || []).map(run => run.length));
+  const fence = '`'.repeat(longestRun + 1);
+  const list = notes.map(
+    (note, k) => `${k + 1}. On ${noteLabel(note)} (line ${note.line}): ${note.text}`,
+  );
+  return [
+    'Use the Stagehand skill to make these changes to my deck. Keep everything I did not mention as it is, and hand back the whole Markdown file.',
+    '',
+    ...list,
+    '',
+    'My deck:',
+    '',
+    `${fence}markdown`,
+    deck,
+    fence,
+  ].join('\n');
 }
 
 /* ---------- your own colors ---------- */
@@ -480,7 +587,10 @@ document.querySelectorAll('[data-copy]').forEach(button =>
 // Pick up where they left off.
 try {
   const last = JSON.parse(localStorage.getItem(LAST_DECK_KEY) || 'null');
-  if (last?.md) useMarkdown(last.md, `${last.name}.md`);
+  if (last?.md) {
+    useMarkdown(last.md, `${last.name}.md`);
+    setNotes(JSON.parse(localStorage.getItem(NOTES_KEY) || '[]'));
+  }
 } catch {
   // Nothing saved, or storage is off.
 }

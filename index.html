@@ -161,6 +161,26 @@
   .checks li.error b { color: #E0654F; }
   @media (max-width: 600px) { .checks li button { grid-template-columns: 1fr; gap: 2px; } }
 
+  /* Notes for Claude */
+  .notes { border-bottom: 1px solid var(--line); padding: 10px 18px 12px; font-size: 14px; }
+  .notes-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; color: var(--soft); }
+  .notes-head .row { gap: 8px; }
+  .note-form { margin-top: 10px; }
+  .note-form label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .note-form label b { color: var(--text); font-weight: 500; }
+  .note-form .row { flex-wrap: nowrap; }
+  .note-form input { flex: 1; min-width: 0; font: 14px var(--sans); color: var(--text); background: #0E0D0B; border: 1px solid var(--edge); border-radius: 8px; padding: 8px 10px; }
+  .note-form input:focus { outline: none; border-color: var(--accent); }
+  @media (max-width: 600px) { .note-form .row { flex-wrap: wrap; } .note-form input { flex-basis: 100%; } }
+  .note-list { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 4px; }
+  .note-list:empty { display: none; }
+  .note-list li { display: grid; grid-template-columns: 112px 1fr auto; gap: 10px; align-items: baseline; padding: 6px 8px; border-radius: 6px; background: var(--raise); }
+  .note-list li b { font-weight: 500; color: var(--accent-strong); }
+  .note-list li span { color: var(--text); }
+  .note-list li button { border: 0; padding: 0 4px; font-size: 16px; line-height: 1; color: var(--muted); }
+  .note-list li button:hover { color: var(--text); }
+  @media (max-width: 600px) { .note-list li { grid-template-columns: 1fr auto; } .note-list li b { grid-column: 1 / -1; } }
+
   /* Templates */
   .tpls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
   @media (max-width: 900px) { .tpls { grid-template-columns: 1fr; } }
@@ -343,6 +363,24 @@
       <div class="panel preview" id="preview">
         <div class="preview-head"><span id="previewTitle">Preview</span><span id="previewCount"></span></div>
         <div class="checks" id="checks" hidden aria-live="polite"></div>
+        <div class="notes" id="notes" hidden>
+          <div class="notes-head">
+            <span id="notesHint">Want Claude to change something? Click a slide to leave it a note.</span>
+            <div class="row">
+              <button type="button" class="small primary" id="copyNotes" hidden>Copy notes for Claude</button>
+              <button type="button" class="small" id="clearNotes" hidden>Clear</button>
+            </div>
+          </div>
+          <form class="note-form" id="noteForm" hidden>
+            <label for="noteText">A note on <b id="noteFor"></b></label>
+            <div class="row">
+              <input id="noteText" type="text" autocomplete="off" placeholder="What should change? Like: turn these into three big stats">
+              <button type="submit" class="small primary">Add note</button>
+              <button type="button" class="small" id="cancelNote">Cancel</button>
+            </div>
+          </form>
+          <ol class="note-list" id="noteList"></ol>
+        </div>
         <div class="empty" id="empty">
           <div class="ghost"><i></i><i></i><i></i><i></i><i></i><i></i></div>
           <p>Your slides show up here as soon as you add some Markdown.</p>
@@ -406,7 +444,7 @@
     <div class="claude">
       <ol>
         <li><div><b>Add the skill</b>Download the <a href="https://github.com/rantbot/stagehand/tree/main/skill">Stagehand skill</a> and add it to Claude, or copy its folder into <code>.claude/skills/</code>.</div></li>
-        <li><div><b>Attach your Markdown</b>Any notes, outline or draft will do. Then send one of the prompts here, changed to fit your talk.</div></li>
+        <li><div><b>Attach your Markdown</b>Any notes, outline or draft will do. Then send one of the prompts here, changed to fit your talk. Or click slides in the preview to leave notes, and copy them for Claude with your deck included.</div></li>
         <li><div><b>Present what comes back</b>Drop the Markdown it returns into <a href="#start">Make a deck</a>, or open the HTML file it writes.</div></li>
       </ol>
       <div class="prompts">
@@ -462,6 +500,9 @@ text: #FFFFFF
 font: Space Grotesk
 body-font: Inter
 ---</pre><p>Your own colors and fonts, on top of any design. Fonts come from Google Fonts. Leave out any you don't need.</p></div>
+      <div class="rule"><pre>```ruby {1|2-3|5}
+...
+```</pre><p>Steps after a code block's language light up those lines one <code>(click)</code> at a time and dim the rest.</p></div>
       <div class="rule"><pre>One sentence, nothing else.</pre><p>Becomes a big statement. Tables and code blocks work too, and slides with lots of words get smaller type on their own.</p></div>
     </div>
   </div>

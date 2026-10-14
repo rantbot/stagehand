@@ -49,6 +49,7 @@ Optional, between two `---` lines at the very top of the file.
 | `body-font` | The font for everything else, also from Google Fonts. |
 | `sound` | A sound bed that plays under the deck, a path or URL to an audio file. |
 | `numbers: off` | Hides slide numbers. |
+| `motion: off` | Turns off carrying headings and pictures between slides. |
 
 The five color and font settings work on top of any theme. Use only the ones you
 need. A client's brand is usually `accent`, `font` and maybe `background`.
@@ -77,6 +78,34 @@ these.
 
 Words in single `*asterisks*` pick up the accent color in headings.
 
+## Code, a few lines at a time
+
+Put steps after a code block's language, in braces, separated by `|`. Each
+`(click)` in your script lights up the next group and dims the rest. Before the
+first click, all the code shows as usual.
+
+````markdown
+```ruby {1|2-3|5}
+def greet(name)
+  message = "Hello, #{name}"
+  puts message
+end
+greet("Ran")
+```
+
+Notes: (click) The method. (click) What it builds. (click) And calling it.
+````
+
+A group can be one line, a range like `2-3`, or several like `1,4`.
+
+## Carried between slides
+
+When two slides in a row share a heading, a small label, a section number or a
+picture, it moves from where it was to where it is now, instead of fading out
+and back in. The rest of the new slide rises in around it. Repeat a heading on
+the next slide to build on it. `motion: off` at the top turns this off, and it
+is off for anyone whose computer asks for reduced motion.
+
 ## Your script
 
 Everything after a `Notes:` line on a slide is your script, shown only in your
@@ -103,9 +132,17 @@ The start page checks a deck as you type and points to the slide and line.
 - More than about 70 words on one slide, a list longer than six items, or a
   heading longer than twelve words.
 - More `(click)` cues than things to reveal.
+- Code steps naming a line the code does not have.
 
 Slides with too many words get smaller type on their own, but it is better to
 cut words, or move them to your script, than to rely on that.
+
+## Notes for Claude
+
+On the start page, click any slide in the preview and write what should change,
+like "turn these into three stats." Add as many as you like, then Copy notes for
+Claude. It copies your notes, each with its slide and line, and the whole deck,
+ready to paste into Claude with the Stagehand skill.
 
 ## Sharing it
 

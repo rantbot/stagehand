@@ -26,7 +26,7 @@ const EXPERIMENTS = {
   slug: 'stagehand',
 
   // Optional. Shows up under "Versions people are running".
-  version: '1.4.0',
+  version: '1.5.0',
 };
 
 /** A random id kept in this browser. Not a person, not an account. */
