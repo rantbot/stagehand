@@ -19,19 +19,19 @@
  */
 
 const EXPERIMENTS = {
-  supabaseUrl: "https://anpdtpaozmblptqrqaam.supabase.co",
-  supabaseAnonKey: "sb_publishable_qDlGahllytUw1ZdvVgloyQ_wZ2b3IqN",
+  supabaseUrl: 'https://anpdtpaozmblptqrqaam.supabase.co',
+  supabaseAnonKey: 'sb_publishable_qDlGahllytUw1ZdvVgloyQ_wZ2b3IqN',
 
   // The folder name of this experiment in the experiments repository.
-  slug: "stagehand",
+  slug: 'stagehand',
 
   // Optional. Shows up under "Versions people are running".
-  version: "1.3.0",
+  version: '1.4.0',
 };
 
 /** A random id kept in this browser. Not a person, not an account. */
 function visitorId() {
-  const key = "experiments-visitor";
+  const key = 'experiments-visitor';
   try {
     let id = localStorage.getItem(key);
     if (!id) {
@@ -57,7 +57,7 @@ const seen = new Set();
 export function track(action, { once = false } = {}) {
   const { supabaseUrl, supabaseAnonKey, slug, version } = EXPERIMENTS;
   if (!supabaseUrl || !supabaseAnonKey || !slug) return;
-  if (typeof action !== "string" || !action || action.length > 40) return;
+  if (typeof action !== 'string' || !action || action.length > 40) return;
   if (once) {
     if (seen.has(action)) return;
     seen.add(action);
@@ -74,14 +74,12 @@ export function track(action, { once = false } = {}) {
   const headers = {
     apikey: supabaseAnonKey,
     Authorization: `Bearer ${supabaseAnonKey}`,
-    "Content-Type": "application/json",
-    Prefer: "return=minimal",
+    'Content-Type': 'application/json',
+    Prefer: 'return=minimal',
   };
 
   try {
-    void fetch(url, { method: "POST", headers, body, keepalive: true }).catch(
-      () => {},
-    );
+    void fetch(url, { method: 'POST', headers, body, keepalive: true }).catch(() => {});
   } catch {
     // Offline, or blocked. Nothing to do and nothing worth saying.
   }
@@ -97,7 +95,7 @@ export function track(action, { once = false } = {}) {
   if (!slug) return;
   try {
     const d = new Date();
-    const pad = (n) => String(n).padStart(2, "0");
+    const pad = n => String(n).padStart(2, '0');
     const on = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
     localStorage.setItem(`experiments-tried:${slug}`, JSON.stringify({ on }));
   } catch {

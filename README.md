@@ -13,8 +13,10 @@ This repository is the whole tool:
 
 ```
 index.html        the start page: drop or paste Markdown, pick a design, present or save it
-md.html           shows a Markdown file as a deck, md.html?src=talk.md
-markdown.js       turns Markdown into slides and picks each slide's layout
+start.js          runs the start page
+md.html, md.js    show a Markdown file as a deck, a preview grid or pages to print
+markdown.js       turns Markdown into slides, picks each slide's layout and checks it
+format.md         the whole Markdown format, for people and for Claude
 example.md        a Markdown deck that uses every layout
 demo.html         the demo deck, which is also a full example of every feature
 blank.html        a short starting deck to copy
@@ -27,7 +29,10 @@ sound.js          optional sound beds and narration
 experiments-web.js  anonymous usage counts for the experiments catalog
 sample.svg        a placeholder picture for the photo layouts
 skill/            the Claude skill that writes decks in this format
+tests/            tests for markdown.js, run with `npm test`
 ```
+
+CONTRIBUTING.md has a tour of how the code fits together.
 
 ## From Markdown
 
@@ -39,27 +44,14 @@ Put a line with three dashes between slides, or leave them out and every `#`
 or `##` heading starts a new slide. Each slide's layout comes from what is on
 it.
 
-| Write this | You get |
-| --- | --- |
-| Front matter: `title`, `subtitle`, `author`, `event`, `theme`, `length` | The title card and settings. `theme` is `classic`, `paper` or `signal`. |
-| A first slide with only `# Title` | The title card |
-| A later slide with only a heading | A section opener. `# 1. Why` adds a big number. |
-| `### Label` above `## Heading` | A small label over the heading |
-| A heading and one short paragraph | A large lede |
-| A list where every line starts with a number, `- **68%** finish setup` | Big stats side by side |
-| `> A quote` with a last line `> — Who said it` | A pull quote |
-| A picture alone, or with a heading | A full bleed photo |
-| A picture with other things | The picture on the right |
-| Two to four `### Headings` with a line under each | Cards |
-| `- **Label**: value` lines | Labels and values in two columns |
-| Any other list | Points |
-| A table, or a fenced code block | A styled table, or a code panel |
-| Only one sentence | A big statement |
+[format.md](format.md) is the whole format, from the settings at the top to
+how each slide picks its layout. It is the one copy kept current, and the
+Claude skill reads it too. Your own colors and fonts go in the front matter with
+`accent`, `background`, `text`, `font` and `body-font`, on top of any theme.
 
-The script is everything after a `Notes:` line, or anything in an HTML comment,
-the way Marp writes them. `(click)` in the script reveals the slide's list
-items, stats or cards one at a time. Slides with more words than fit get
-smaller type on their own.
+The start page checks the deck as you type, with each problem pointing to its
+slide and line. Click one to jump to it. Save as PDF opens every slide on its
+own page for the print window.
 
 To keep a Markdown deck on the site, put the `.md` file next to `md.html` and
 link to `md.html?src=talk.md`. Add `&theme=paper` to override its theme.

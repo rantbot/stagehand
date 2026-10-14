@@ -49,6 +49,12 @@ like placeholder figures or a picture they need to supply.
 
 ## The format
 
+**Read the current format first.** It lives at
+https://rantbot.github.io/stagehand/format.md and changes with every release.
+If you can fetch it, it wins over anything written below, which is a copy kept
+here for when you cannot.
+
+
 Slides are separated by a line with three dashes. Front matter goes first.
 
 ```markdown
@@ -76,6 +82,11 @@ Notes: What the speaker says while the title card is up.
 
 Notes: Here is the plan. (click) First... (click) Then... (click) And last...
 ```
+
+For a brand or a look of their own, add any of `accent`, `background` and
+`text` (hex colors like `#FF5A36`), `font` and `body-font` (names from Google
+Fonts) to the front matter. They work on top of any theme, so this is the way to
+restyle a deck while still handing back Markdown.
 
 `theme` is `classic` (dark and warm, documentary), `paper` (light and
 editorial, for retros, research and case studies) or `signal` (bold and bright,
@@ -111,8 +122,20 @@ script the speaker sees, so they are a good place for sources.
 Slides with too many words get smaller type automatically, but it is better to
 cut words than to rely on that.
 
+### Check it before you hand it back
+
+The start page checks every deck and points to the slide and line, so anything
+you leave wrong shows up as a warning for them. Before you finish, go through
+the same list: every code block closed, every setting valid, no slide over about
+70 words, no list over six items, no heading over twelve words, and no more
+`(click)` cues than things to reveal. If you can run code, `checkMarkdown` in
+https://rantbot.github.io/stagehand/markdown.js returns the same list.
+
 Pictures are paths relative to where the deck is hosted. Ask for the files if
 the talk needs real photos, and leave a clearly named placeholder otherwise.
+
+When they want to send the slides to someone, tell them Save as PDF on the
+start page gives one slide per page.
 
 ## The HTML deck, when they want one
 

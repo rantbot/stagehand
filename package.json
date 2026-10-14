@@ -1,0 +1,14 @@
+{
+  "name": "stagehand",
+  "private": true,
+  "description": "Presentations from Markdown, in two windows. No build step and nothing to install.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "test": "node --test",
+    "lint": "npx --yes eslint@9.13.0 .",
+    "format": "npx --yes prettier@3.3.3 --write .",
+    "format:check": "npx --yes prettier@3.3.3 --check ."
+  }
+}

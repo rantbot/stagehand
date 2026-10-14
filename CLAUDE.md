@@ -54,6 +54,20 @@ repository and is not part of this experiment.
 - **Open source under MIT, October 2026.** Ran wanted it clear that anyone can
   contribute. `LICENSE` and `CONTRIBUTING.md` are at the root, and the start page
   has a Contribute section and says so under the hero.
+- **Ideas from Hype, October 2026.** After reading DHH's Hype, Ran asked for
+  three of its ideas. `checkMarkdown` in markdown.js finds problems by slide and
+  line, and the preview adds what only layout can show (slides `fitSlides`
+  could not fit, pictures that fail). Front matter `accent`, `background`,
+  `text`, `font` and `body-font` become a `<style class="sh-brand">` ahead of
+  the deck, so a brand works on any theme without Claude. Save as PDF is
+  `md.html?view=print`, one 1920 by 1080 page per slide and the print dialog.
+  `format.md` is the one current copy of the format, and the skill reads it
+  first so it stops drifting from markdown.js.
+- **Cleaned up for other developers, October 2026.** The start page's script
+  moved to `start.js` and md.html's to `md.js`. Prettier and ESLint configs,
+  `npm test` (node:test, no installs) and a GitHub check run on every push.
+  CONTRIBUTING.md has the tour. Behavior did not change, checked by comparing
+  a two window run and the example deck's HTML before and after.
 - **Dropped files stay in the browser.** The start page keeps the Markdown in
   localStorage under a hash and opens md.html?id=… so both windows can read it.
   Nothing is uploaded.
